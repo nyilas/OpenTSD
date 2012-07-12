@@ -1,0 +1,5 @@
+Stringhe usata per i test:
+
+cms -timestamp_verify -in fileTSD/Petagna/2F_Cf.pdf.p7m.tsd -CAfile fileTSD/Petagna/TSA_Infocert.pem -inform DER -out fileTSD/2F_Cf.pdf.p7m
+
+cms -timestamp_verify -in fileTSD/Clepsydre/Clepsydre.pdf.p7m.tsd -CAfile fileTSD/Clepsydre/Clepsydre.pem -inform DER -out fileTSD/Clepsydre.pdf.p7m
