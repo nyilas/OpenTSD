@@ -1,6 +1,8 @@
 /* crypto/cms/cms_tsd.c */
 /* Written by Antonio Eletto (antele@gmail.com) for the OpenSSL
  * project 2012.
+ *
+ * RFC 5544
  */
 /* ====================================================================
  * Copyright (c) 2012 The OpenSSL Project.  All rights reserved.
