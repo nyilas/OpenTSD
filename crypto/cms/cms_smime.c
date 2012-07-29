@@ -874,6 +874,7 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	STACK_OF(CMS_TimeStampAndCRL) *tstEvidenceSequence;
 	CMS_TimeStampAndCRL *tmpEvidence;
 	CMS_ContentInfo *token;
+	X509_CRL *crl;
 	ASN1_INTEGER *version;
 	BIO *tmpin, *cmsbio;
 	int i;
@@ -915,13 +916,14 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		{
 		tmpEvidence = sk_CMS_TimeStampAndCRL_value(tstEvidenceSequence, i);
 		token = tmpEvidence->timeStamp;
+		crl = tmpEvidence->crl;
 		if(!token)
 			{
 			CMSerr(CMS_F_CMS_TIMESTAMP_VERIFY, CMS_R_NULL_TIMESTAMP_TOKEN);
 			return 0;
 			}
 
-		if (!cms_token_verify(cms, token, certs, store, flags))
+		if (!cms_token_verify(cms, token, crl, certs, store, flags))
 			return 0;
 		}
 
