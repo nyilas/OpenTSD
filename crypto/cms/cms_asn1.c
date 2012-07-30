@@ -311,6 +311,13 @@ ASN1_NDEF_SEQUENCE(CMS_MetaData) = {
 	ASN1_SET_OF_OPT(CMS_MetaData, otherMetaData, X509_ATTRIBUTE),
 }ASN1_NDEF_SEQUENCE_END(CMS_MetaData)
 
+IMPLEMENT_ASN1_FUNCTIONS_const(CMS_MetaData)
+int cms_metaData_encode(CMS_MetaData *metaData, unsigned char **out)
+	{
+	return i2d_CMS_MetaData(metaData, out);
+	}
+
+
 ASN1_SEQUENCE(CMS_TimeStampAndCRL) = {
 	ASN1_SIMPLE(CMS_TimeStampAndCRL, timeStamp, CMS_ContentInfo),
 	ASN1_OPT(CMS_TimeStampAndCRL, crl, X509_CRL),

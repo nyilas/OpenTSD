@@ -114,6 +114,11 @@ static ASN1_OCTET_STRING *cms_MessageImprint_get0_hashedMessage(CMS_MessageImpri
 	return messageImprint->hashedMessage;
 	}
 
+static CMS_MetaData *cms_get0_metaData(CMS_ContentInfo *cms)
+	{
+	return cms_get0_timestamped(cms)->metaData;
+	}
+
 int cms_check_dataUri(CMS_ContentInfo *cms)
 	{
 	ASN1_IA5STRING *dataUri = cms->d.timestampedData->dataUri;
@@ -139,7 +144,11 @@ static int cms_Token_signature_verify(CMS_ContentInfo *token,
 	return 1;
 	}
 
-static int cms_compute_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
+
+/*static int cms_compute_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
+		X509_ALGOR **digestAlgorithm,
+		unsigned char **digest, unsigned *digestLength)*/
+static int cms_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 		X509_ALGOR **digestAlgorithm,
 		unsigned char **digest, unsigned *digestLength)
 	{
@@ -148,12 +157,16 @@ static int cms_compute_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 	const EVP_MD *md;
 	EVP_MD_CTX mdContext;
 	ASN1_OCTET_STRING **data;
+	CMS_MetaData *metaData;
+	unsigned char **metaDataEncode;
 //	unsigned char buffer[4096];
 	int length = 0;
 
+	*metaDataEncode = NULL;
 	messageImprint = cms_TSTInfo_get0_msgImprint(tstInfo);
 	tokenDigestAlgorithm = cms_MessageImprint_get0_hashAlgorithm(messageImprint);
 	data = CMS_get0_content(cms);
+	metaData = cms_get0_metaData(cms);
 
 	/* Return the MD algorithm of the response. */
 	*digestAlgorithm = X509_ALGOR_dup(tokenDigestAlgorithm);
@@ -164,7 +177,7 @@ static int cms_compute_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 	md = EVP_get_digestbyobj((*digestAlgorithm)->algorithm);
 	if (!md)
 		{
-		CMSerr(CMS_F_CMS_COMPUTE_DIGEST, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
+		CMSerr(CMS_F_CMS_CONTENT_DIGEST, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
 		goto err;
 		}
 
@@ -176,7 +189,7 @@ static int cms_compute_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 
 	if (!(*digest = OPENSSL_malloc(*digestLength)))
 		{
-		CMSerr(CMS_F_CMS_COMPUTE_DIGEST, ERR_R_MALLOC_FAILURE);
+		CMSerr(CMS_F_CMS_CONTENT_DIGEST, ERR_R_MALLOC_FAILURE);
 		goto err;
 		}
 
@@ -185,6 +198,16 @@ static int cms_compute_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 
 //		while ((length = BIO_read(data, buffer, sizeof(buffer))) > 0)
 //			{
+	if(metaData && metaData->hashProtected)
+		{
+		if(!(length=cms_metaData_encode(metaData, metaDataEncode)))
+			{
+			CMSerr(CMS_F_CMS_CONTENT_DIGEST, CMS_R_DIGEST_ERROR);
+			goto err;
+			}
+		if (!EVP_DigestUpdate(&mdContext, *metaDataEncode, length))
+				goto err;
+		}
 	if (!EVP_DigestUpdate(&mdContext, (*data)->data, (*data)->length))
 		goto err;
 //			}
