@@ -922,8 +922,9 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 			CMSerr(CMS_F_CMS_TIMESTAMP_VERIFY, CMS_R_NULL_TIMESTAMP_TOKEN);
 			return 0;
 			}
-
-		if (!cms_token_verify(cms, token, crl, certs, store, flags))
+		if(crl)
+			CMS_add1_crl(token, crl);
+		if (!cms_token_verify(cms, token, certs, store, flags))
 			return 0;
 		}
 
