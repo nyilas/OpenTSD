@@ -872,9 +872,7 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	{
 	// timestamp token evidence sequence
 	STACK_OF(CMS_TimeStampAndCRL) *tstEvidenceSequence;
-	CMS_TimeStampAndCRL *tmpEvidence;
-	CMS_ContentInfo *token;
-	X509_CRL *crl;
+	CMS_ContentInfo *currentToken, *previousToken;
 	ASN1_INTEGER *version;
 	BIO *tmpin, *cmsbio;
 	int i;
@@ -911,21 +909,18 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		return 0;
 		}
 
-	/* we need to validate all tokens in the chain */
-	for (i = 0; i < sk_CMS_TimeStampAndCRL_num(tstEvidenceSequence); i++)
+	/* we vaidate first token of the chain bifore */
+	previousToken = cms_get_token(tstEvidenceSequence, 0);
+	if (!cms_primaryToken_verify(cms, previousToken, certs, store, flags))
+				return 0;
+
+	/* we validate all the extending tokens in the chain */
+	for (i = 1; i < sk_CMS_TimeStampAndCRL_num(tstEvidenceSequence); i++)
 		{
-		tmpEvidence = sk_CMS_TimeStampAndCRL_value(tstEvidenceSequence, i);
-		token = tmpEvidence->timeStamp;
-		crl = tmpEvidence->crl;
-		if(!token)
-			{
-			CMSerr(CMS_F_CMS_TIMESTAMP_VERIFY, CMS_R_NULL_TIMESTAMP_TOKEN);
+		currentToken = cms_get_token(tstEvidenceSequence, i);
+		if (!cms_extendingToken_verify(currentToken, previousToken, certs, store, flags))
 			return 0;
-			}
-		if(crl)
-			CMS_add1_crl(token, crl);
-		if (!cms_token_verify(cms, token, certs, store, flags))
-			return 0;
+		previousToken = currentToken;
 		}
 
 	if (dcont && (BIO_method_type(dcont) == BIO_TYPE_MEM))

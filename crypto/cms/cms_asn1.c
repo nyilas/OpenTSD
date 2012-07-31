@@ -312,9 +312,20 @@ ASN1_NDEF_SEQUENCE(CMS_MetaData) = {
 }ASN1_NDEF_SEQUENCE_END(CMS_MetaData)
 
 IMPLEMENT_ASN1_FUNCTIONS_const(CMS_MetaData)
-int cms_metaData_encode(CMS_MetaData *metaData, unsigned char **out)
+int cms_metaData_encode(CMS_ContentInfo *cms, unsigned char **out)
 	{
-	return i2d_CMS_MetaData(metaData, out);
+	CMS_MetaData *metaData;
+
+	*out = NULL;
+	if (OBJ_obj2nid(CMS_get0_type(cms)) != NID_id_smime_ct_timestampedData)
+		{
+		CMSerr(CMS_F_CMS_METADATA_ENCODE, CMS_R_CONTENT_TYPE_NOT_TIMESTAMPED_DATA);
+		return -1;
+		}
+	metaData = cms_get0_metaData(cms);
+	if(metaData && metaData->hashProtected)
+		return i2d_CMS_MetaData(metaData, out);
+	return 0;
 	}
 
 
@@ -407,7 +418,7 @@ CMS_TSTInfo *cms_tstInfo_decode(CMS_ContentInfo *token)
 
 	if (OBJ_obj2nid(CMS_get0_eContentType(token)) != NID_id_smime_ct_TSTInfo)
 		{
-		CMSerr(CMS_F_CMS_TSTINFO_DECODE, CMS_R_TSTINFO_CHECK_FAIL);
+		CMSerr(CMS_F_CMS_TSTINFO_DECODE, CMS_R_CONTENT_TYPE_NOT_TSTINFO);
 		return NULL;
 		}
 
