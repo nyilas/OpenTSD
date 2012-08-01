@@ -909,16 +909,14 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		return 0;
 		}
 
-	/* we vaidate first token of the chain bifore */
-	previousToken = cms_get_token(tstEvidenceSequence, 0);
-	if (!cms_primaryToken_verify(cms, previousToken, certs, store, flags))
-				return 0;
-
-	/* we validate all the extending tokens in the chain */
-	for (i = 1; i < sk_CMS_TimeStampAndCRL_num(tstEvidenceSequence); i++)
+	/* First token digest is computed on the content field, while all the extending
+	 * token digests are computed on the DER encoded previous token in the chain
+	 */
+	previousToken = cms;
+	for (i = 0; i < sk_CMS_TimeStampAndCRL_num(tstEvidenceSequence); i++)
 		{
 		currentToken = cms_get_token(tstEvidenceSequence, i);
-		if (!cms_extendingToken_verify(currentToken, previousToken, certs, store, flags))
+		if (!cms_extendingToken_verify(previousToken, currentToken, certs, store, flags))
 			return 0;
 		previousToken = currentToken;
 		}

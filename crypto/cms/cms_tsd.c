@@ -167,7 +167,7 @@ static int cms_Token_signature_verify(CMS_ContentInfo *token,
 /*static int cms_compute_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 		X509_ALGOR **digestAlgorithm,
 		unsigned char **digest, unsigned *digestLength)*/
-static int cms_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
+static int cms_compute_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 		X509_ALGOR **digestAlgorithm,
 		unsigned char **digest, unsigned *digestLength)
 	{
@@ -232,7 +232,7 @@ static int cms_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 	return 0;
 	}
 
-static int cms_token_digest(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo,
+static int cms_compute_token_digest(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo,
 		X509_ALGOR **digestAlgorithm,
 		unsigned char **digest, unsigned *digestLength)
 	{
@@ -297,7 +297,7 @@ static int cms_token_digest(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo,
 	return 0;
 	}
 
-static int cms_Token_digest_verify(CMS_TSTInfo *tstInfo,
+static int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
 		unsigned char *digest, unsigned digestLength)
 	{
 	CMS_MessageImprint *messageImprint;
@@ -321,7 +321,7 @@ static int cms_Token_digest_verify(CMS_TSTInfo *tstInfo,
 	return 1;
 	}
 
-int cms_primaryToken_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token,
+int cms_Token_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token,
 		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
 	{
 	X509_ALGOR *digestAlgorithm = NULL;
@@ -334,44 +334,6 @@ int cms_primaryToken_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token,
 	if (ASN1_INTEGER_get(tstInfo->version) != 1)
 		{
 		CMSerr(CMS_F_CMS_PRIMARYTOKEN_VERIFY, CMS_R_UNSUPPORTED_VERSION);
-		goto err;
-		}
-
-	/* verify the signature */
-	if (!cms_Token_signature_verify(token, certs, store, flags))
-		goto err;
-
-	/* compute the hash of the content */
-	if (!cms_compute_digest(cms, tstInfo, &digestAlgorithm,
-			&digest, &digestLength))
-		goto err;
-
-	/* verify the hash matching */
-	if (!cms_Token_digest_verify(tstInfo, digestAlgorithm, digest, digestLength))
-		goto err;
-
-	return 1;
-
-	err:
-
-	if (tstInfo)
-		CMS_TSTInfo_free(tstInfo);
-	return 0;
-	}
-
-int cms_extendingToken_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token,
-		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
-	{
-	X509_ALGOR *digestAlgorithm = NULL;
-	unsigned char *digest = NULL;
-	unsigned digestLength = 0;
-	CMS_TSTInfo *tstInfo;
-
-	/* tstInfo get and version check */
-	tstInfo = cms_get0_tstInfo(token);
-	if (ASN1_INTEGER_get(tstInfo->version) != 1)
-		{
-		CMSerr(CMS_F_CMS_EXTENDINGTOKEN_VERIFY, CMS_R_UNSUPPORTED_VERSION);
 		goto err;
 		}
 
