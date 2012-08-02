@@ -913,11 +913,17 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	 * token digests are computed on the DER encoded previous token in the chain
 	 */
 	previousToken = cms;
-	for (i = 0; i < sk_CMS_TimeStampAndCRL_num(tstEvidenceSequence); i++)
+	for (i = 0, flags; i < sk_CMS_TimeStampAndCRL_num(tstEvidenceSequence); i++)
 		{
 		currentToken = cms_get_token(tstEvidenceSequence, i);
-		if (!cms_extendingToken_verify(previousToken, currentToken, certs, store, flags))
+
+		/* verifies the digests matching */
+		if (!cms_Token_digest_verify(previousToken, currentToken, i))
 			return 0;
+		/* verifies the signature */
+		if (!cms_Token_signature_verify(currentToken, certs, store, flags))
+				goto err;
+
 		previousToken = currentToken;
 		}
 

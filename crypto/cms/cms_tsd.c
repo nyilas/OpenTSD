@@ -163,27 +163,21 @@ static int cms_Token_signature_verify(CMS_ContentInfo *token,
 	return 1;
 	}
 
-
-/*static int cms_compute_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
-		X509_ALGOR **digestAlgorithm,
-		unsigned char **digest, unsigned *digestLength)*/
 static int cms_compute_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 		X509_ALGOR **digestAlgorithm,
 		unsigned char **digest, unsigned *digestLength)
 	{
-	CMS_MessageImprint *messageImprint;
+	CMS_MessageImprint *tokenDigest;
 	X509_ALGOR *tokenDigestAlgorithm;
 	const EVP_MD *md;
 	EVP_MD_CTX mdContext;
 	ASN1_OCTET_STRING **data;
 	unsigned char **metaDataEncode;
-//	unsigned char buffer[4096];
 	int length = 0;
 
-	messageImprint = cms_TSTInfo_get0_msgImprint(tstInfo);
-	tokenDigestAlgorithm = cms_MessageImprint_get0_hashAlgorithm(messageImprint);
+	tokenDigest = cms_TSTInfo_get0_msgImprint(tstInfo);
+	tokenDigestAlgorithm = cms_MessageImprint_get0_hashAlgorithm(tokenDigest);
 	data = CMS_get0_content(cms);
-
 
 	/* Return the MD algorithm of the response. */
 	*digestAlgorithm = X509_ALGOR_dup(tokenDigestAlgorithm);
@@ -194,7 +188,7 @@ static int cms_compute_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo
 	md = EVP_get_digestbyobj((*digestAlgorithm)->algorithm);
 	if (!md)
 		{
-		CMSerr(CMS_F_CMS_CONTENT_DIGEST, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
+		CMSerr(CMS_F_CMS_COMPUTE_CONTENT_DIGEST, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
 		goto err;
 		}
 
@@ -206,7 +200,7 @@ static int cms_compute_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo
 
 	if (!(*digest = OPENSSL_malloc(*digestLength)))
 		{
-		CMSerr(CMS_F_CMS_CONTENT_DIGEST, ERR_R_MALLOC_FAILURE);
+		CMSerr(CMS_F_CMS_COMPUTE_CONTENT_DIGEST, ERR_R_MALLOC_FAILURE);
 		goto err;
 		}
 
@@ -236,18 +230,17 @@ static int cms_compute_token_digest(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo
 		X509_ALGOR **digestAlgorithm,
 		unsigned char **digest, unsigned *digestLength)
 	{
-	CMS_MessageImprint *messageImprint;
+	CMS_MessageImprint *tokenDigest;
 	X509_ALGOR *tokenDigestAlgorithm;
 	const EVP_MD *md;
 	EVP_MD_CTX mdContext;
 	ASN1_OCTET_STRING **data;
-	unsigned char **metaDataEncode;
-//	unsigned char buffer[4096];
+	unsigned char **tokenEncode;
 	int length = 0;
 
-	messageImprint = cms_TSTInfo_get0_msgImprint(tstInfo);
-	tokenDigestAlgorithm = cms_MessageImprint_get0_hashAlgorithm(messageImprint);
-	data = CMS_get0_content(cms);
+	tokenDigest = cms_TSTInfo_get0_msgImprint(tstInfo);
+	tokenDigestAlgorithm = cms_MessageImprint_get0_hashAlgorithm(tokenDigest);
+	//data = CMS_get0_content(cms);
 
 
 	/* Return the MD algorithm of the response. */
@@ -259,7 +252,7 @@ static int cms_compute_token_digest(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo
 	md = EVP_get_digestbyobj((*digestAlgorithm)->algorithm);
 	if (!md)
 		{
-		CMSerr(CMS_F_CMS_CONTENT_DIGEST, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
+		CMSerr(CMS_F_CMS_COMPUTE_TOKEN_DIGEST, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
 		goto err;
 		}
 
@@ -271,19 +264,17 @@ static int cms_compute_token_digest(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo
 
 	if (!(*digest = OPENSSL_malloc(*digestLength)))
 		{
-		CMSerr(CMS_F_CMS_CONTENT_DIGEST, ERR_R_MALLOC_FAILURE);
+		CMSerr(CMS_F_CMS_COMPUTE_TOKEN_DIGEST, ERR_R_MALLOC_FAILURE);
 		goto err;
 		}
 
 	if (!EVP_DigestInit(&mdContext, md))
 		goto err;
 
-	length=cms_metaData_encode(cms, metaDataEncode);
-	if(*metaDataEncode)
-		if (!EVP_DigestUpdate(&mdContext, *metaDataEncode, length))
+	length=i2d_CMS_ContentInfo(token, tokenEncode);
+	if(*tokenEncode)
+		if (!EVP_DigestUpdate(&mdContext, *tokenEncode, length))
 			goto err;
-	if (!EVP_DigestUpdate(&mdContext, (*data)->data, (*data)->length))
-		goto err;
 	if (!EVP_DigestFinal(&mdContext, *digest, NULL))
 		goto err;
 
@@ -310,19 +301,18 @@ static int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
 
 	if (digestLength != (unsigned)tokenDigest->length)
 		{
-		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_NO_MATCHING_DIGEST);
+		CMSerr(CMS_F_CMS_DIGEST_MATCHING_VERIFY, CMS_R_NO_MATCHING_DIGEST);
 		return 0;
 		}
 	if (memcmp(digest, tokenDigest->data, digestLength) != 0)
 		{
-		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_NO_MATCHING_DIGEST);
+		CMSerr(CMS_F_CMS_DIGEST_MATCHING_VERIFY, CMS_R_NO_MATCHING_DIGEST);
 		return 0;
 		}
 	return 1;
 	}
 
-int cms_Token_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token,
-		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
+int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int extToken)
 	{
 	X509_ALGOR *digestAlgorithm = NULL;
 	unsigned char *digest = NULL;
@@ -333,21 +323,23 @@ int cms_Token_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token,
 	tstInfo = cms_get0_tstInfo(token);
 	if (ASN1_INTEGER_get(tstInfo->version) != 1)
 		{
-		CMSerr(CMS_F_CMS_PRIMARYTOKEN_VERIFY, CMS_R_UNSUPPORTED_VERSION);
+		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_UNSUPPORTED_VERSION);
 		goto err;
 		}
 
-	/* verify the signature */
-	if (!cms_Token_signature_verify(token, certs, store, flags))
-		goto err;
+	if (!extToken) /* compute the digest on the content field */
+		{
+		if (!cms_compute_content_digest(cms, tstInfo, &digestAlgorithm,
+				&digest, &digestLength))
+			goto err;
+		}
+	else /* compute the digest on the previous token */
+		if (!cms_compute_token_digest(cms, tstInfo, &digestAlgorithm,
+				&digest, &digestLength))
+			goto err;
 
-	/* compute the hash of the content */
-	if (!cms_compute_digest(cms, tstInfo, &digestAlgorithm,
-			&digest, &digestLength))
-		goto err;
-
-	/* verify the hash matching */
-	if (!cms_Token_digest_verify(tstInfo, digestAlgorithm, digest, digestLength))
+	/* verifies the digest matching */
+	if (!cms_digest_matching_verify(tstInfo, digestAlgorithm, digest, digestLength))
 		goto err;
 
 	return 1;
