@@ -874,7 +874,7 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	STACK_OF(CMS_TimeStampAndCRL) *tstEvidenceSequence;
 	CMS_ContentInfo *currentToken, *previousToken;
 	ASN1_INTEGER *version;
-	BIO *tmpin, *cmsbio;
+	BIO *tmpin = NULL, *cmsbio = NULL;
 	int i;
 
 	flags |= CMS_TIMESTAMP_VERIFY;
@@ -935,7 +935,7 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		tmpin = BIO_new_mem_buf(ptr, len);
 		if (tmpin == NULL)
 			{
-			CMSerr(CMS_F_CMS_VERIFY,ERR_R_MALLOC_FAILURE);
+			CMSerr(CMS_F_CMS_TIMESTAMP_VERIFY, ERR_R_MALLOC_FAILURE);
 			return 0;
 			}
 		}
@@ -961,32 +961,32 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	return 0;
 	}
 
-int CMS_tiemstamp_create(BIO *content, BIO *response, char *dataUri,
-		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
-	{
-	CMS_ContentInfo *cms;
-
-	if (!content)
-		{
-		if (!dataUri)
-			{
-			CMSerr(CMS_F_CMS_TIMESTAMP_CREATE, CMS_R_CONTENT_NOT_FOUND);
-			return NULL;
-			}
-		flags |= CMS_DETACHED;
-		}
-
-	cms = cms_TimeStampedData_create();
-	if (!cms)
-		return NULL;
-
-	if ((flags & CMS_STREAM) || CMS_final(cms, content, NULL, flags))
-		return cms;
-
-	err:
-
-	if (cms)
-		CMS_ContentInfo_free(cms);
-
-	return NULL;
-	}
+//int CMS_timestamp_create(BIO *content, BIO *response, char *dataUri,
+//		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
+//	{
+//	CMS_ContentInfo *cms;
+//
+//	if (!content)
+//		{
+//		if (!dataUri)
+//			{
+//			CMSerr(CMS_F_CMS_TIMESTAMP_CREATE, CMS_R_CONTENT_NOT_FOUND);
+//			return NULL;
+//			}
+//		flags |= CMS_DETACHED;
+//		}
+//
+//	cms = cms_TimeStampedData_create();
+//	if (!cms)
+//		return NULL;
+//
+//	if ((flags & CMS_STREAM) || CMS_final(cms, content, NULL, flags))
+//		return cms;
+//
+//	err:
+//
+//	if (cms)
+//		CMS_ContentInfo_free(cms);
+//
+//	return NULL;
+//	}

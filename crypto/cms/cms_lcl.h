@@ -683,6 +683,8 @@ DECLARE_ASN1_ITEM(CMS_TimeStampAndCRL)
 DECLARE_ASN1_ITEM(CMS_TSTInfo)
 DECLARE_ASN1_ALLOC_FUNCTIONS(CMS_IssuerAndSerialNumber)
 DECLARE_ASN1_FUNCTIONS(CMS_TimestampedData)
+DECLARE_ASN1_FUNCTIONS(CMS_TSTInfo)
+DECLARE_ASN1_FUNCTIONS(CMS_MetaData)
 
 #define CMS_SIGNERINFO_ISSUER_SERIAL	0
 #define CMS_SIGNERINFO_KEYIDENTIFIER	1
@@ -732,11 +734,18 @@ int cms_RecipientInfo_pwri_crypt(CMS_ContentInfo *cms, CMS_RecipientInfo *ri,
 							int en_de);
 
 STACK_OF(CMS_TimeStampAndCRL) *cms_get0_timeStampTokenChain(CMS_ContentInfo *cms);
-int cms_token_signature_verify(CMS_TimeStampAndCRL *token, STACK_OF(X509) *certs,
-		 X509_STORE *store, BIO *dcont, BIO *out, unsigned int flags);
-int cms_token_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token,
-		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags);
+CMS_ContentInfo *cms_get_token(STACK_OF(CMS_TimeStampAndCRL) *tstEvidenceSequence, int index);
+CMS_TSTInfo *cms_tstInfo_decode(CMS_ContentInfo *token);
+int cms_metaData_encode(CMS_ContentInfo *cms, unsigned char **out);
+int cms_compute_content_digest(CMS_ContentInfo *cms, EVP_MD_CTX *mdContext, unsigned char *digest);
+int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContext, unsigned char *digest);
+int cms_Token_signature_verify(CMS_ContentInfo *token, STACK_OF(X509) *certs,
+		 X509_STORE *store, unsigned int flags);
+int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int extToken);
 int cms_check_dataUri(CMS_ContentInfo *cms);
+CMS_MetaData *cms_get0_metaData(CMS_ContentInfo *cms);
+int cms_digest_matching_verify(CMS_TSTInfo *tstInfo, unsigned char *digest, unsigned digestLength);
+
 
 #ifdef  __cplusplus
 }

@@ -68,7 +68,7 @@
 //DECLARE_STACK_OF(CMS_TimeStampAndCRL)
 
 
-static CMS_TimestampedData *cms_get0_timestamped(CMS_ContentInfo *cms)
+static CMS_TimestampedData *cms_get0_timestampedData(CMS_ContentInfo *cms)
 	{
 	if (OBJ_obj2nid(CMS_get0_type(cms)) != NID_id_smime_ct_timestampedData)
 		{
@@ -88,19 +88,19 @@ STACK_OF(CMS_TimeStampAndCRL) *cms_get0_timeStampTokenChain(
 		CMS_ContentInfo *cms)
 	{
 	CMS_Evidence *evidence;
-	evidence = cms_get0_timestamped(cms)->temporalEvidence;
+	evidence = cms_get0_timestampedData(cms)->temporalEvidence;
 	if (!evidence)
 		return NULL;
  	return evidence->d.tstEvidence;
 	}
 
-CMS_ContentInfo *cms_get_token(STACK_OF(CMS_TimeStampAndCRL) tstEvidenceSequence, int index)
+CMS_ContentInfo *cms_get_token(STACK_OF(CMS_TimeStampAndCRL) *tstEvidenceSequence, int index)
 	{
 	CMS_TimeStampAndCRL *tmpEvidence;
 	CMS_ContentInfo *token;
 	X509_CRL *crl;
 
-	tmpEvidence = sk_CMS_TimeStampAndCRL_value(tstEvidenceSequence, i);
+	tmpEvidence = sk_CMS_TimeStampAndCRL_value(tstEvidenceSequence, index);
 	token = tmpEvidence->timeStamp;
 	crl = tmpEvidence->crl;
 	if(!token)
@@ -130,14 +130,16 @@ static X509_ALGOR *cms_TSTInfo_get0_hashAlgorithm(CMS_TSTInfo *tstInfo)
 	return messageImprint->hashAlgorithm;
 	}
 
-static ASN1_OCTET_STRING *cms_MessageImprint_get0_hashedMessage(CMS_MessageImprint *messageImprint)
+static ASN1_OCTET_STRING *cms_TSTInfo_get0_hashedMessage(CMS_TSTInfo *tstInfo)
 	{
+	CMS_MessageImprint *messageImprint;
+	messageImprint = cms_TSTInfo_get0_msgImprint(tstInfo);
 	return messageImprint->hashedMessage;
 	}
 
-static CMS_MetaData *cms_get0_metaData(CMS_ContentInfo *cms)
+CMS_MetaData *cms_get0_metaData(CMS_ContentInfo *cms)
 	{
-	return cms_get0_timestamped(cms)->metaData;
+	return cms_get0_timestampedData(cms)->metaData;
 	}
 
 int cms_check_dataUri(CMS_ContentInfo *cms)
@@ -171,7 +173,7 @@ int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int ex
 
 	/* Getting the MD object. */
 	digestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
-	md = EVP_get_digestbyobj((*digestAlgorithm)->algorithm);
+	md = EVP_get_digestbyobj(digestAlgorithm->algorithm);
 	if (!md)
 		{
 		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
@@ -214,7 +216,7 @@ int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int ex
 	return 0;
 	}
 
-static int cms_compute_content_digest(CMS_ContentInfo *cms, EVP_MD_CTX *mdContext,
+int cms_compute_content_digest(CMS_ContentInfo *cms, EVP_MD_CTX *mdContext,
 		unsigned char *digest)
 	{
 	ASN1_OCTET_STRING **data;
@@ -233,7 +235,7 @@ static int cms_compute_content_digest(CMS_ContentInfo *cms, EVP_MD_CTX *mdContex
 	return 1;
 	}
 
-static int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContext,
+int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContext,
 		unsigned char *digest)
 	{
 	unsigned char *tokenEncode;
@@ -248,16 +250,14 @@ static int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContex
 	return 1;
 	}
 
-static int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
+int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
 		unsigned char *digest, unsigned digestLength)
 	{
-	CMS_MessageImprint *messageImprint;
 	X509_ALGOR *tokenDigestAlgorithm;
 	ASN1_OCTET_STRING *tokenDigest;
 
-	messageImprint = cms_TSTInfo_get0_msgImprint(tstInfo);
-	tokenDigestAlgorithm = cms_MessageImprint_get0_hashAlgorithm(messageImprint);
-	tokenDigest = cms_MessageImprint_get0_hashedMessage(messageImprint);
+	tokenDigestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
+	tokenDigest = cms_TSTInfo_get0_hashedMessage(tstInfo);
 
 	if (digestLength != (unsigned)tokenDigest->length)
 		{
@@ -289,137 +289,41 @@ int cms_Token_signature_verify(CMS_ContentInfo *token,
 	return 1;
 	}
 
-//static int cms_tknDigest_verify(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo,
-//		X509_ALGOR **digestAlgorithm,
-//		unsigned char **digest, unsigned *digestLength)
+//CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, BIO *response,
+//		unsigned char *dataUri, STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
 //	{
-//	X509_ALGOR *tokenDigestAlgorithm;
-//	const EVP_MD *md;
-//	EVP_MD_CTX mdContext;
-//	ASN1_OCTET_STRING **data;
-//	unsigned char *tokenEncode;
-//	int length = 0;
+//	CMS_ContentInfo *cms;
+//	CMS_TimestampedData *tsd;
 //
-//	tokenDigestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
+//	cms = CMS_ContentInfo_new();
+//	if (!cms)
+//		return NULL;
 //
-//	/* Return the MD algorithm of the response. */
-//	*digestAlgorithm = X509_ALGOR_dup(tokenDigestAlgorithm);
-//	if (!(*digestAlgorithm))
+//	tsd = M_ASN1_new_of(CMS_TimestampedData);
+//	if (!tsd)
 //		goto err;
 //
-//	/* Getting the MD object. */
-//	md = EVP_get_digestbyobj((*digestAlgorithm)->algorithm);
-//	if (!md)
+//	cms->contentType = OBJ_nid2obj(NID_id_smime_ct_timestampedData);
+//	cms->d.timestampedData = tsd;
+//
+//	tsd->version = M_ASN1_INTEGER_new();
+//	if (!ASN1_INTEGER_set(tsd->version, 1))
+//		goto err;
+//
+//	if (dataUri)
 //		{
-//		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
-//		goto err;
-//		}
-//
-//	/* Compute message digest. */
-//	length = EVP_MD_size(md);
-//	if (length < 0)
-//	    goto err;
-//	*digestLength = length;
-//
-//	if (!(*digest = OPENSSL_malloc(*digestLength)))
-//		{
-//		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, ERR_R_MALLOC_FAILURE);
-//		goto err;
-//		}
-//
-//	if (!EVP_DigestInit(&mdContext, md))
-//		goto err;
-//
-//	length=i2d_CMS_ContentInfo(token, &tokenEncode);
-//	if(*tokenEncode)
-//		if (!EVP_DigestUpdate(&mdContext, *tokenEncode, length))
+//		tsd->dataUri = M_ASN1_IA5STRING_new();
+//		if (!ASN1_STRING_set(tsd->dataUri, dataUri, strlen(dataUri)))
 //			goto err;
-//	if (!EVP_DigestFinal(&mdContext, *digest, NULL))
-//		goto err;
-//
-//	return 1;
+//		}
 //
 //	err:
 //
-//	X509_ALGOR_free(*digestAlgorithm);
-//	OPENSSL_free(*digest);
-//	*digestLength = 0;
-//	return 0;
+//	if (tsd)
+//		M_ASN1_free_of(tsd, CMS_TimestampedData);
+//
+//	if (cms)
+//		CMS_ContentInfo_free(cms);
+//
 //	}
-
-//int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int extToken)
-//	{
-//	X509_ALGOR *digestAlgorithm = NULL;
-//	unsigned char *digest = NULL;
-//	unsigned digestLength = 0;
-//	CMS_TSTInfo *tstInfo;
-//
-//	/* tstInfo get and version check */
-//	tstInfo = cms_get0_tstInfo(token);
-//	if (ASN1_INTEGER_get(tstInfo->version) != 1)
-//		{
-//		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_UNSUPPORTED_VERSION);
-//		goto err;
-//		}
-//
-//	if (!extToken) /* compute the digest on the content field */
-//		{
-//		if (!cms_cntDigest_verify(cms, tstInfo))
-//			goto err;
-//		}
-//	else /* compute the digest on the previous token */
-//		if (!cms_tknDigest_verify(cms, tstInfo))
-//			goto err;
-//
-////	/* verifies the digest matching */
-////	if (!cms_digest_matching_verify(tstInfo, digestAlgorithm, digest, digestLength))
-////		goto err;
-//
-//	return 1;
-//
-//	err:
-//
-//	if (tstInfo)
-//		CMS_TSTInfo_free(tstInfo);
-//	return 0;
-//	}
-
-
-CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, BIO *response,
-		unsigned char *dataUri, STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
-	{
-	CMS_ContentInfo *cms;
-	CMS_TimestampedData *tsd;
-
-	cms = CMS_ContentInfo_new();
-	if (!cms)
-		return NULL;
-
-	tsd = M_ASN1_new_of(CMS_TimestampedData);
-	if (!tsd)
-		goto err;
-
-	cms->contentType = OBJ_nid2obj(NID_id_smime_ct_timestampedData);
-	cms->d.timestampedData = tsd;
-
-	tsd->version = M_ASN1_INTEGER_new();
-	if (!ASN1_INTEGER_set(tsd->version, 1))
-		goto err;
-
-	if (dataUri)
-		{
-		tsd->dataUri = M_ASN1_IA5STRING_new();
-		if (!ASN1_STRING_set(tsd->dataUri, dataUri, strlen(dataUri)))
-			goto err;
-		}
-
-	err:
-
-	if (tsd)
-		M_ASN1_free_of(tsd, CMS_TimestampedData);
-
-	if (cms)
-		CMS_ContentInfo_free(cms);
-
-	}
 

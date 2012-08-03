@@ -311,7 +311,7 @@ ASN1_NDEF_SEQUENCE(CMS_MetaData) = {
 	ASN1_SET_OF_OPT(CMS_MetaData, otherMetaData, X509_ATTRIBUTE),
 }ASN1_NDEF_SEQUENCE_END(CMS_MetaData)
 
-IMPLEMENT_ASN1_FUNCTIONS_const(CMS_MetaData)
+IMPLEMENT_ASN1_FUNCTIONS(CMS_MetaData)
 int cms_metaData_encode(CMS_ContentInfo *cms, unsigned char **out)
 	{
 	CMS_MetaData *metaData;
@@ -410,7 +410,7 @@ ASN1_SEQUENCE(CMS_TSTInfo) = {
 /*
  * Load in the inner form the DER encoded TSTInfo structure.
  */
-IMPLEMENT_ASN1_FUNCTIONS_const(CMS_TSTInfo)
+IMPLEMENT_ASN1_FUNCTIONS(CMS_TSTInfo)
 CMS_TSTInfo *cms_tstInfo_decode(CMS_ContentInfo *token)
 {
 	ASN1_OCTET_STRING **tstInfo;

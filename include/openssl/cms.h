@@ -113,6 +113,8 @@ DECLARE_ASN1_PRINT_FUNCTION(CMS_ContentInfo)
 #define CMS_USE_KEYID			0x10000
 #define CMS_DEBUG_DECRYPT		0x20000
 #define CMS_TIMESTAMP_VERIFY	0x40000
+#define CMS_EXT_TOKEN			0X80000
+
 
 const ASN1_OBJECT *CMS_get0_type(CMS_ContentInfo *cms);
 
@@ -241,6 +243,8 @@ CMS_ContentInfo *CMS_compress(BIO *in, int comp_nid, unsigned int flags);
 
 int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		 X509_STORE *store, BIO *dcont, BIO *out, unsigned int flags);
+int CMS_timestamp_create(BIO *content, BIO *response, char *dataUri,
+		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags);
 
 int CMS_set1_eContentType(CMS_ContentInfo *cms, const ASN1_OBJECT *oid);
 const ASN1_OBJECT *CMS_get0_eContentType(CMS_ContentInfo *cms);
@@ -368,6 +372,7 @@ void ERR_load_CMS_strings(void);
 #define CMS_F_CMS_DIGESTALGORITHM_FIND_CTX		 115
 #define CMS_F_CMS_DIGESTALGORITHM_INIT_BIO		 116
 #define CMS_F_CMS_DIGESTEDDATA_DO_FINAL			 117
+#define CMS_F_CMS_DIGEST_MATCHING_VERIFY		 176
 #define CMS_F_CMS_DIGEST_VERIFY				 118
 #define CMS_F_CMS_ENCODE_RECEIPT			 161
 #define CMS_F_CMS_ENCRYPT				 119
@@ -387,6 +392,8 @@ void ERR_load_CMS_strings(void);
 #define CMS_F_CMS_GET0_REVOCATION_CHOICES		 132
 #define CMS_F_CMS_GET0_SIGNED				 133
 #define CMS_F_CMS_GET0_TIMESTAMPED			 177
+#define CMS_F_CMS_GET_TOKEN				 178
+#define CMS_F_CMS_METADATA_ENCODE			 179
 #define CMS_F_CMS_MSGSIGDIGEST_ADD1			 162
 #define CMS_F_CMS_RECEIPTREQUEST_CREATE0		 159
 #define CMS_F_CMS_RECEIPT_VERIFY			 160
@@ -415,6 +422,7 @@ void ERR_load_CMS_strings(void);
 #define CMS_F_CMS_SIGNERINFO_VERIFY_CONTENT		 154
 #define CMS_F_CMS_SIGN_RECEIPT				 163
 #define CMS_F_CMS_STREAM				 155
+#define CMS_F_CMS_TIMESTAMP_CREATE			 180
 #define CMS_F_CMS_TIMESTAMP_VERIFY			 169
 #define CMS_F_CMS_TOKEN_DIGEST_VERIFY			 175
 #define CMS_F_CMS_TOKEN_SIGNATURE_VERIFY		 172
@@ -439,6 +447,7 @@ void ERR_load_CMS_strings(void);
 #define CMS_R_CONTENT_TYPE_NOT_ENVELOPED_DATA		 107
 #define CMS_R_CONTENT_TYPE_NOT_SIGNED_DATA		 108
 #define CMS_R_CONTENT_TYPE_NOT_TIMESTAMPED_DATA		 187
+#define CMS_R_CONTENT_TYPE_NOT_TSTINFO			 188
 #define CMS_R_CONTENT_VERIFY_ERROR			 109
 #define CMS_R_CTRL_ERROR				 110
 #define CMS_R_CTRL_FAILURE				 111
