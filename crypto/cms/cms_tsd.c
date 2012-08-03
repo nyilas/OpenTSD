@@ -163,6 +163,9 @@ int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int ex
 	unsigned char *digest;
 	int length = 0, digestLength = 0;
 
+	digest = NULL;
+	digestAlgorithm = NULL;
+
 	/* tstInfo get and version check */
 	tstInfo = cms_get0_tstInfo(token);
 	if (ASN1_INTEGER_get(tstInfo->version) != 1)
@@ -253,10 +256,10 @@ int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContext,
 int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
 		unsigned char *digest, unsigned digestLength)
 	{
-	X509_ALGOR *tokenDigestAlgorithm;
+//	X509_ALGOR *tokenDigestAlgorithm;
 	ASN1_OCTET_STRING *tokenDigest;
 
-	tokenDigestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
+//	tokenDigestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
 	tokenDigest = cms_TSTInfo_get0_hashedMessage(tstInfo);
 
 	if (digestLength != (unsigned)tokenDigest->length)
