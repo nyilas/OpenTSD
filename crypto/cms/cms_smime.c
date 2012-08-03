@@ -919,10 +919,10 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 
 		/* verifies the digests matching */
 		if (!cms_Token_digest_verify(previousToken, currentToken, i))
-			return 0;
+			goto err;
 		/* verifies the signature */
 		if (!cms_Token_signature_verify(currentToken, certs, store, flags))
-				goto err;
+			goto err;
 
 		previousToken = currentToken;
 		}
@@ -942,7 +942,6 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	else
 		tmpin = dcont;
 
-
 	cmsbio=CMS_dataInit(cms, NULL);
 	if (!cmsbio)
 		goto err;
@@ -950,7 +949,7 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	if (!cms_copy_content(out, cmsbio, flags))
 		goto err;
 
-//	ret = 1;
+	return 1;
 
 	err:
 
@@ -959,7 +958,7 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	else
 		BIO_free_all(cmsbio);
 
-	return 1;
+	return 0;
 	}
 
 int CMS_tiemstamp_create(BIO *content, BIO *response, char *dataUri,

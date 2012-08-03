@@ -152,85 +152,25 @@ int cms_check_dataUri(CMS_ContentInfo *cms)
 //static int cms_compute_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 //		X509_ALGOR **digestAlgorithm,
 //		unsigned char **digest, unsigned *digestLength)
-static int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo, int extToken)
+int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int extToken)
 	{
+	CMS_TSTInfo *tstInfo;
 	X509_ALGOR *digestAlgorithm;
 	const EVP_MD *md;
 	EVP_MD_CTX mdContext;
-	ASN1_OCTET_STRING **data;
-	unsigned char *metaDataEncode, *digest;
+	unsigned char *digest;
 	int length = 0, digestLength = 0;
 
-//	tokenDigestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
+	/* tstInfo get and version check */
+	tstInfo = cms_get0_tstInfo(token);
+	if (ASN1_INTEGER_get(tstInfo->version) != 1)
+		{
+		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_UNSUPPORTED_VERSION);
+		goto err;
+		}
+
+	/* Getting the MD object. */
 	digestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
-	data = CMS_get0_content(cms);
-
-	/* Return the MD algorithm of the response. */
-//	*digestAlgorithm = X509_ALGOR_dup(tokenDigestAlgorithm);
-//	if (!(*digestAlgorithm))
-//		goto err;
-
-	/* Getting the MD object. */
-	md = EVP_get_digestbyobj((*digestAlgorithm)->algorithm);
-	if (!md)
-		{
-		CMSerr(CMS_F_CMS_CONTENT_DIGEST_VERIFY, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
-		goto err;
-		}
-
-	/* Compute message digest. */
-	length = EVP_MD_size(md);
-	if (length < 0)
-	    goto err;
-	digestLength = length;
-
-	if (!(digest = OPENSSL_malloc(digestLength)))
-		{
-		CMSerr(CMS_F_CMS_CONTENT_DIGEST_VERIFY, ERR_R_MALLOC_FAILURE);
-		goto err;
-		}
-
-	if (!EVP_DigestInit(&mdContext, md))
-		goto err;
-
-	length=cms_metaData_encode(cms, &metaDataEncode);
-	if(metaDataEncode)
-		if (!EVP_DigestUpdate(&mdContext, metaDataEncode, length))
-			goto err;
-	if (!EVP_DigestUpdate(&mdContext, (*data)->data, (*data)->length))
-		goto err;
-	if (!EVP_DigestFinal(&mdContext, digest, NULL))
-		goto err;
-
-	return cms_digest_matching_verify(tstInfo, digest, digestLength);
-
-	err:
-
-	X509_ALGOR_free(digestAlgorithm);
-	OPENSSL_free(digest);
-	digestLength = 0;
-	return 0;
-	}
-
-static int cms_tknDigest_verify(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo,
-		X509_ALGOR **digestAlgorithm,
-		unsigned char **digest, unsigned *digestLength)
-	{
-	X509_ALGOR *tokenDigestAlgorithm;
-	const EVP_MD *md;
-	EVP_MD_CTX mdContext;
-	ASN1_OCTET_STRING **data;
-	unsigned char *tokenEncode;
-	int length = 0;
-
-	tokenDigestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
-
-	/* Return the MD algorithm of the response. */
-	*digestAlgorithm = X509_ALGOR_dup(tokenDigestAlgorithm);
-	if (!(*digestAlgorithm))
-		goto err;
-
-	/* Getting the MD object. */
 	md = EVP_get_digestbyobj((*digestAlgorithm)->algorithm);
 	if (!md)
 		{
@@ -238,41 +178,74 @@ static int cms_tknDigest_verify(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo,
 		goto err;
 		}
 
-	/* Compute message digest. */
+	/* Compute digest size and allocate needed space */
 	length = EVP_MD_size(md);
 	if (length < 0)
 	    goto err;
-	*digestLength = length;
-
-	if (!(*digest = OPENSSL_malloc(*digestLength)))
+	digestLength = length;
+	if (!(digest = OPENSSL_malloc(digestLength)))
 		{
 		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, ERR_R_MALLOC_FAILURE);
 		goto err;
 		}
 
+	/* Init context and compute digest */
 	if (!EVP_DigestInit(&mdContext, md))
 		goto err;
+	if (!extToken) /* compute the digest on the content field */
+		{
+		if (!cms_compute_content_digest(cms, &mdContext, digest))
+			goto err;
+		}
+	else /* compute the digest on the previous token */
+		if (!cms_compute_token_digest(token, &mdContext, digest))
+			goto err;
+
+	return cms_digest_matching_verify(tstInfo, digest, digestLength);
+
+	err:
+	if (tstInfo)
+		CMS_TSTInfo_free(tstInfo);
+	if (digestAlgorithm)
+		X509_ALGOR_free(digestAlgorithm);
+	if (digest)
+		OPENSSL_free(digest);
+	digestLength = 0;
+	return 0;
+	}
+
+static int cms_compute_content_digest(CMS_ContentInfo *cms, EVP_MD_CTX *mdContext,
+		unsigned char *digest)
+	{
+	ASN1_OCTET_STRING **data;
+	unsigned char *metaDataEncode;
+	int length = 0;
+
+	data = CMS_get0_content(cms);
+	length=cms_metaData_encode(cms, &metaDataEncode);
+	if(metaDataEncode)
+		if (!EVP_DigestUpdate(&mdContext, metaDataEncode, length))
+				return 0;
+	if (!EVP_DigestUpdate(&mdContext, (*data)->data, (*data)->length))
+		return 0;
+	if (!EVP_DigestFinal(&mdContext, digest, NULL))
+		return 0;
+	return 1;
+	}
+
+static int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContext,
+		unsigned char *digest)
+	{
+	unsigned char *tokenEncode;
+	int length = 0;
 
 	length=i2d_CMS_ContentInfo(token, &tokenEncode);
 	if(*tokenEncode)
 		if (!EVP_DigestUpdate(&mdContext, *tokenEncode, length))
-			goto err;
+			return 0;
 	if (!EVP_DigestFinal(&mdContext, *digest, NULL))
-		goto err;
-
+		return 0;
 	return 1;
-
-	err:
-
-	X509_ALGOR_free(*digestAlgorithm);
-	OPENSSL_free(*digest);
-	*digestLength = 0;
-	return 0;
-	}
-
-static unsigned char *cms_compute_digest()
-	{
-
 	}
 
 static int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
@@ -299,43 +272,6 @@ static int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
 	return 1;
 	}
 
-int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int extToken)
-	{
-	X509_ALGOR *digestAlgorithm = NULL;
-	unsigned char *digest = NULL;
-	unsigned digestLength = 0;
-	CMS_TSTInfo *tstInfo;
-
-	/* tstInfo get and version check */
-	tstInfo = cms_get0_tstInfo(token);
-	if (ASN1_INTEGER_get(tstInfo->version) != 1)
-		{
-		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_UNSUPPORTED_VERSION);
-		goto err;
-		}
-
-	if (!extToken) /* compute the digest on the content field */
-		{
-		if (!cms_cntDigest_verify(cms, tstInfo))
-			goto err;
-		}
-	else /* compute the digest on the previous token */
-		if (!cms_tknDigest_verify(cms, tstInfo))
-			goto err;
-
-//	/* verifies the digest matching */
-//	if (!cms_digest_matching_verify(tstInfo, digestAlgorithm, digest, digestLength))
-//		goto err;
-
-	return 1;
-
-	err:
-
-	if (tstInfo)
-		CMS_TSTInfo_free(tstInfo);
-	return 0;
-	}
-
 int cms_Token_signature_verify(CMS_ContentInfo *token,
 		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
 	{
@@ -352,6 +288,102 @@ int cms_Token_signature_verify(CMS_ContentInfo *token,
 
 	return 1;
 	}
+
+//static int cms_tknDigest_verify(CMS_ContentInfo *token, CMS_TSTInfo *tstInfo,
+//		X509_ALGOR **digestAlgorithm,
+//		unsigned char **digest, unsigned *digestLength)
+//	{
+//	X509_ALGOR *tokenDigestAlgorithm;
+//	const EVP_MD *md;
+//	EVP_MD_CTX mdContext;
+//	ASN1_OCTET_STRING **data;
+//	unsigned char *tokenEncode;
+//	int length = 0;
+//
+//	tokenDigestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
+//
+//	/* Return the MD algorithm of the response. */
+//	*digestAlgorithm = X509_ALGOR_dup(tokenDigestAlgorithm);
+//	if (!(*digestAlgorithm))
+//		goto err;
+//
+//	/* Getting the MD object. */
+//	md = EVP_get_digestbyobj((*digestAlgorithm)->algorithm);
+//	if (!md)
+//		{
+//		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_UNKNOWN_DIGEST_ALGORIHM);
+//		goto err;
+//		}
+//
+//	/* Compute message digest. */
+//	length = EVP_MD_size(md);
+//	if (length < 0)
+//	    goto err;
+//	*digestLength = length;
+//
+//	if (!(*digest = OPENSSL_malloc(*digestLength)))
+//		{
+//		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, ERR_R_MALLOC_FAILURE);
+//		goto err;
+//		}
+//
+//	if (!EVP_DigestInit(&mdContext, md))
+//		goto err;
+//
+//	length=i2d_CMS_ContentInfo(token, &tokenEncode);
+//	if(*tokenEncode)
+//		if (!EVP_DigestUpdate(&mdContext, *tokenEncode, length))
+//			goto err;
+//	if (!EVP_DigestFinal(&mdContext, *digest, NULL))
+//		goto err;
+//
+//	return 1;
+//
+//	err:
+//
+//	X509_ALGOR_free(*digestAlgorithm);
+//	OPENSSL_free(*digest);
+//	*digestLength = 0;
+//	return 0;
+//	}
+
+//int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int extToken)
+//	{
+//	X509_ALGOR *digestAlgorithm = NULL;
+//	unsigned char *digest = NULL;
+//	unsigned digestLength = 0;
+//	CMS_TSTInfo *tstInfo;
+//
+//	/* tstInfo get and version check */
+//	tstInfo = cms_get0_tstInfo(token);
+//	if (ASN1_INTEGER_get(tstInfo->version) != 1)
+//		{
+//		CMSerr(CMS_F_CMS_TOKEN_DIGEST_VERIFY, CMS_R_UNSUPPORTED_VERSION);
+//		goto err;
+//		}
+//
+//	if (!extToken) /* compute the digest on the content field */
+//		{
+//		if (!cms_cntDigest_verify(cms, tstInfo))
+//			goto err;
+//		}
+//	else /* compute the digest on the previous token */
+//		if (!cms_tknDigest_verify(cms, tstInfo))
+//			goto err;
+//
+////	/* verifies the digest matching */
+////	if (!cms_digest_matching_verify(tstInfo, digestAlgorithm, digest, digestLength))
+////		goto err;
+//
+//	return 1;
+//
+//	err:
+//
+//	if (tstInfo)
+//		CMS_TSTInfo_free(tstInfo);
+//	return 0;
+//	}
+
 
 CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, BIO *response,
 		unsigned char *dataUri, STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
