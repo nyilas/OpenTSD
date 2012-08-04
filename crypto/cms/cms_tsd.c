@@ -150,6 +150,39 @@ int cms_check_dataUri(CMS_ContentInfo *cms)
 	return 1;
 	}
 
+static int cms_compute_content_digest(CMS_ContentInfo *cms, EVP_MD_CTX *mdContext,
+		unsigned char *digest)
+	{
+	ASN1_OCTET_STRING **data;
+	unsigned char *metaDataEncode;
+	int length = 0;
+
+	data = CMS_get0_content(cms);
+	length=cms_metaData_encode(cms, &metaDataEncode);
+	if(metaDataEncode)
+		if (!EVP_DigestUpdate(mdContext, metaDataEncode, length))
+				return 0;
+	if (!EVP_DigestUpdate(mdContext, (*data)->data, (*data)->length))
+		return 0;
+	if (!EVP_DigestFinal(mdContext, digest, NULL))
+		return 0;
+	return 1;
+	}
+
+static int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContext,
+		unsigned char *digest)
+	{
+	unsigned char *tokenEncode;
+	int length = 0;
+
+	length=i2d_CMS_ContentInfo(token, &tokenEncode);
+	if(*tokenEncode)
+		if (!EVP_DigestUpdate(mdContext, tokenEncode, length))
+			return 0;
+	if (!EVP_DigestFinal(mdContext, digest, NULL))
+		return 0;
+	return 1;
+	}
 
 //static int cms_compute_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 //		X509_ALGOR **digestAlgorithm,
@@ -208,6 +241,7 @@ int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int ex
 
 	return cms_digest_matching_verify(tstInfo, digest, digestLength);
 
+
 	err:
 	if (tstInfo)
 		CMS_TSTInfo_free(tstInfo);
@@ -217,40 +251,6 @@ int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int ex
 		OPENSSL_free(digest);
 	digestLength = 0;
 	return 0;
-	}
-
-int cms_compute_content_digest(CMS_ContentInfo *cms, EVP_MD_CTX *mdContext,
-		unsigned char *digest)
-	{
-	ASN1_OCTET_STRING **data;
-	unsigned char *metaDataEncode;
-	int length = 0;
-
-	data = CMS_get0_content(cms);
-	length=cms_metaData_encode(cms, &metaDataEncode);
-	if(metaDataEncode)
-		if (!EVP_DigestUpdate(&mdContext, metaDataEncode, length))
-				return 0;
-	if (!EVP_DigestUpdate(&mdContext, (*data)->data, (*data)->length))
-		return 0;
-	if (!EVP_DigestFinal(&mdContext, digest, NULL))
-		return 0;
-	return 1;
-	}
-
-int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContext,
-		unsigned char *digest)
-	{
-	unsigned char *tokenEncode;
-	int length = 0;
-
-	length=i2d_CMS_ContentInfo(token, &tokenEncode);
-	if(*tokenEncode)
-		if (!EVP_DigestUpdate(&mdContext, *tokenEncode, length))
-			return 0;
-	if (!EVP_DigestFinal(&mdContext, *digest, NULL))
-		return 0;
-	return 1;
 	}
 
 int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,

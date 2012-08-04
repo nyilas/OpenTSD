@@ -737,8 +737,8 @@ STACK_OF(CMS_TimeStampAndCRL) *cms_get0_timeStampTokenChain(CMS_ContentInfo *cms
 CMS_ContentInfo *cms_get_token(STACK_OF(CMS_TimeStampAndCRL) *tstEvidenceSequence, int index);
 CMS_TSTInfo *cms_tstInfo_decode(CMS_ContentInfo *token);
 int cms_metaData_encode(CMS_ContentInfo *cms, unsigned char **out);
-int cms_compute_content_digest(CMS_ContentInfo *cms, EVP_MD_CTX *mdContext, unsigned char *digest);
-int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContext, unsigned char *digest);
+//int cms_compute_content_digest(CMS_ContentInfo *cms, EVP_MD_CTX *mdContext, unsigned char *digest);
+//int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContext, unsigned char *digest);
 int cms_Token_signature_verify(CMS_ContentInfo *token, STACK_OF(X509) *certs,
 		 X509_STORE *store, unsigned int flags);
 int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int extToken);
