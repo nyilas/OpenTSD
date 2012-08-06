@@ -1,6 +1,7 @@
 OpenTSD July 2012
 
-This is an attempt to develop an RFC 5544 compliant extension for the OpenSSL project.
+This is an attempt to develop an RFC 5544 (Syntax for Binding Documents with Time-Stamps) compliant extension 
+for the OpenSSL project.
 
 The license for the patch is the same as that of OpenSSL, you can find it at http://www.openssl.org/source/license.html.
 
