@@ -5,7 +5,7 @@ for the OpenSSL project.
 
 The license for the patch is the same as that of OpenSSL, you can find it at http://www.openssl.org/source/license.html.
 
-The current status is very very very preliminary. For now, you can only verify a non detached TimeStampedData file 
+The current status is very very very preliminary. At the moment, you can only verify a non detached TimeStampedData file 
 without MetaData and only a single RFC 3161 type of evidence is supported.
 The patch is based on the latest OpenSSL-1.0.1c version and extends the cms command with a new -timestamp_verify option:
 
