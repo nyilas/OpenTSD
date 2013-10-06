@@ -7,9 +7,9 @@ cms -timestamp_verify -in fileTSD/Clepsydre.pdf.p7m.tsd -CAfile fileTSD/Clepsydr
 
 To do:
 
-The optional crl field carries a suitable CRL (Certificate Revocation List) demonstrating that the certificate of the TSA 
-(Time-Stamping Authority) that issued the TimeStampToken was not revoked at the time when the subsequent element in the 
-TimeStampTokenEvidence sequence was added.
+The optional crl field carries a suitable CRL (Certificate Revocation List) demonstrating that the certificate 
+of the TSA (Time-Stamping Authority) that issued the TimeStampToken was not revoked at the time when the 
+subsequent element in the TimeStampTokenEvidence sequence was added.
 
 -   open the first element of the TimeStampTokenEvidence sequence,
 	open the time-stamp token within it and use the hash function that
@@ -17,6 +17,7 @@ TimeStampTokenEvidence sequence was added.
 	indicated in Section 2; if the re-computed hash value matches the
 	one within the time-stamp token, continue processing; otherwise,
 	the TimeStampedData structure has been modified;
+
 -	validate the temporalEvidence by checking that:
 	- each TimeStampToken in the chain does contain the correct digest
 	  value (according to the rule described in Section 2) and it was
@@ -24,3 +25,5 @@ TimeStampTokenEvidence sequence was added.
 	- the corresponding TSA signing certificate was not revoked at the
 	  time when the subsequent TimeStampToken was issued, based on the
 	  associated CRL;
+
+- create

@@ -72,7 +72,7 @@ static CMS_TimestampedData *cms_get0_timestampedData(CMS_ContentInfo *cms)
 	{
 	if (OBJ_obj2nid(CMS_get0_type(cms)) != NID_id_smime_ct_timestampedData)
 		{
-		CMSerr(CMS_F_CMS_GET0_TIMESTAMPED,
+		CMSerr(CMS_F_CMS_GET0_TIMESTAMPEDDATA,
 				CMS_R_CONTENT_TYPE_NOT_TIMESTAMPED_DATA);
 		return NULL;
 		}
@@ -292,41 +292,41 @@ int cms_Token_signature_verify(CMS_ContentInfo *token,
 	return 1;
 	}
 
-//CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, BIO *response,
-//		unsigned char *dataUri, STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
-//	{
-//	CMS_ContentInfo *cms;
-//	CMS_TimestampedData *tsd;
-//
-//	cms = CMS_ContentInfo_new();
-//	if (!cms)
-//		return NULL;
-//
-//	tsd = M_ASN1_new_of(CMS_TimestampedData);
-//	if (!tsd)
-//		goto err;
-//
-//	cms->contentType = OBJ_nid2obj(NID_id_smime_ct_timestampedData);
-//	cms->d.timestampedData = tsd;
-//
-//	tsd->version = M_ASN1_INTEGER_new();
-//	if (!ASN1_INTEGER_set(tsd->version, 1))
-//		goto err;
-//
-//	if (dataUri)
-//		{
-//		tsd->dataUri = M_ASN1_IA5STRING_new();
-//		if (!ASN1_STRING_set(tsd->dataUri, dataUri, strlen(dataUri)))
-//			goto err;
-//		}
-//
-//	err:
-//
-//	if (tsd)
-//		M_ASN1_free_of(tsd, CMS_TimestampedData);
-//
-//	if (cms)
-//		CMS_ContentInfo_free(cms);
-//
-//	}
+CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, BIO *response,
+		unsigned char *dataUri, STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
+	{
+	CMS_ContentInfo *cms;
+	CMS_TimestampedData *tsd;
+
+	cms = CMS_ContentInfo_new();
+	if (!cms)
+		return NULL;
+
+	tsd = M_ASN1_new_of(CMS_TimestampedData);
+	if (!tsd)
+		goto err;
+
+	cms->contentType = OBJ_nid2obj(NID_id_smime_ct_timestampedData);
+	cms->d.timestampedData = tsd;
+
+	tsd->version = M_ASN1_INTEGER_new();
+	if (!ASN1_INTEGER_set(tsd->version, 1))
+		goto err;
+
+	if (dataUri)
+		{
+		tsd->dataUri = M_ASN1_IA5STRING_new();
+		if (!ASN1_STRING_set(tsd->dataUri, dataUri, strlen(dataUri)))
+			goto err;
+		}
+
+	err:
+
+	if (tsd)
+		M_ASN1_free_of(tsd, CMS_TimestampedData);
+
+	if (cms)
+		CMS_ContentInfo_free(cms);
+
+	}
 
