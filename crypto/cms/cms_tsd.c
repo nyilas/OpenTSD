@@ -253,7 +253,7 @@ int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int ex
 	return 0;
 	}
 
-int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
+static int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
 		unsigned char *digest, unsigned digestLength)
 	{
 //	X509_ALGOR *tokenDigestAlgorithm;
