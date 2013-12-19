@@ -523,7 +523,7 @@ int MAIN(int argc, char **argv)
 				goto argerr;
 			contfile = *++args;
 			}
-		else if (!strcmp (*args, "-response"))
+		else if (!strcmp (*args, "-tsresp"))
 			{
 			if (!args[1])
 				goto argerr;
@@ -803,7 +803,7 @@ int MAIN(int argc, char **argv)
 		{
 		if (!(resp = BIO_new_file(respfile, "rb")))
 			{
-			BIO_printf (bio_err, "Can't read content file %s\n", respfile);
+			BIO_printf (bio_err, "Can't read response file %s\n", respfile);
 			goto end;
 			}
 		BIO_free(indata);
