@@ -113,7 +113,7 @@ int MAIN(int argc, char **argv)
 	char **args;
 	const char *inmode = "r", *outmode = "w";
 	char *infile = NULL, *outfile = NULL, *rctfile = NULL;
-	char *respfile = NULL;
+	char *timeStampToken = NULL, *dataUri = NULL, *mediaType = NULL;
 	char *signerfile = NULL, *recipfile = NULL;
 	STACK_OF(OPENSSL_STRING) *sksigners = NULL, *skkeys = NULL;
 	char *certfile = NULL, *keyfile = NULL, *contfile=NULL;
@@ -124,7 +124,7 @@ int MAIN(int argc, char **argv)
 	X509 *cert = NULL, *recip = NULL, *signer = NULL;
 	EVP_PKEY *key = NULL;
 	STACK_OF(X509) *encerts = NULL, *other = NULL;
-	BIO *in = NULL, *out = NULL, *indata = NULL, *rctin = NULL, *resp = NULL;
+	BIO *in = NULL, *out = NULL, *indata = NULL, *rctin = NULL, *token = NULL;
 	int badarg = 0;
 	int flags = CMS_DETACHED, noout = 0, print = 0;
 	int verify_retcode = 0;
@@ -279,6 +279,8 @@ int MAIN(int argc, char **argv)
 				flags |= CMS_NOOLDMIMETYPE;
 		else if (!strcmp (*args, "-crlfeol"))
 				flags |= CMS_CRLFEOL;
+		else if (!strcmp (*args, "-metaData"))
+				flags |= CMS_METADATA;
 		else if (!strcmp (*args, "-noout"))
 				noout = 1;
 		else if (!strcmp (*args, "-receipt_request_print"))
@@ -523,11 +525,23 @@ int MAIN(int argc, char **argv)
 				goto argerr;
 			contfile = *++args;
 			}
-		else if (!strcmp (*args, "-tsresp"))
+		else if (!strcmp (*args, "-timeStamp"))
 			{
 			if (!args[1])
 				goto argerr;
-			respfile = *++args;
+			timeStampToken = *++args;
+			}
+		else if (!strcmp (*args, "-mediaType"))
+			{
+			if (!args[1])
+				goto argerr;
+			mediaType = *++args;
+			}
+		else if (!strcmp (*args, "-dataUri"))
+			{
+			if (!args[1])
+				goto argerr;
+			dataUri = *++args;
 			}
 		else if (args_verify(&args, NULL, &badarg, bio_err, &vpm))
 			continue;
@@ -601,9 +615,9 @@ int MAIN(int argc, char **argv)
 		}
 	else if (operation == SMIME_TIMESTAMP_CREATE)
 		{
-		if (!contfile && !respfile)
+		if (!contfile && !timeStampToken)
 			{
-			BIO_printf (bio_err, "No content or response specified\n");
+			BIO_printf (bio_err, "No content or token specified\n");
 			badarg = 1;
 			}
 		}
@@ -660,8 +674,7 @@ int MAIN(int argc, char **argv)
 		BIO_printf (bio_err, "-keyform arg   input private key format (PEM or ENGINE)\n");
 		BIO_printf (bio_err, "-out file      output file\n");
 		BIO_printf (bio_err, "-outform arg   output format SMIME (default), PEM or DER\n");
-		BIO_printf (bio_err, "-content file  supply or override content for detached signature\n");
-		BIO_printf (bio_err, "-response file time stamp response file\n");
+		BIO_printf (bio_err, "-content file  supply or override content for detached signature or timeStamp\n");
 		BIO_printf (bio_err, "-to addr       to address\n");
 		BIO_printf (bio_err, "-from ad       from address\n");
 		BIO_printf (bio_err, "-subject s     subject\n");
@@ -678,6 +691,9 @@ int MAIN(int argc, char **argv)
 		BIO_printf(bio_err,  "               load the file (or the files in the directory) into\n");
 		BIO_printf(bio_err,  "               the random number generator\n");
 		BIO_printf (bio_err, "cert.pem       recipient certificate(s) for encryption\n");
+		BIO_printf (bio_err, "-timeStamp file input time stamp token");
+		BIO_printf (bio_err, "-metaData		 hash protect metaData field");
+		BIO_printf (bio_err, "-mediaType arg the content mime type");
 		goto end;
 		}
 
@@ -801,9 +817,9 @@ int MAIN(int argc, char **argv)
 
 	if (operation == SMIME_TIMESTAMP_CREATE)
 		{
-		if (!(resp = BIO_new_file(respfile, "rb")))
+		if (!(token = BIO_new_file(timeStampToken, "rb")))
 			{
-			BIO_printf (bio_err, "Can't read response file %s\n", respfile);
+			BIO_printf (bio_err, "Can't read token file %s\n", timeStampToken);
 			goto end;
 			}
 		BIO_free(indata);
@@ -1215,6 +1231,34 @@ int MAIN(int argc, char **argv)
 		if (rr_print)
 			receipt_request_print(bio_err, cms);
 		}
+	else if (operation == SMIME_TIMESTAMP_CREATE)
+			{
+			if (CMS_timestamp_create(in, token, dataUri, out, sign_md, flags) > 0)
+				BIO_printf(bio_err, "Timestamp creation successful\n");
+			else
+				{
+				BIO_printf(bio_err, "Timestamp creation failure\n");
+				if (verify_retcode)
+					ret = verify_err + 32;
+				goto end;
+				}
+			if (signerfile)
+				{
+				STACK_OF(X509) *signers;
+				signers = CMS_get0_signers(cms);
+				if (!save_certs(signerfile, signers))
+					{
+					BIO_printf(bio_err,
+							"Error writing signers to %s\n",
+							signerfile);
+					ret = 5;
+					goto end;
+					}
+				sk_X509_free(signers);
+				}
+			if (rr_print)
+				receipt_request_print(bio_err, cms);
+			}
 	else
 		{
 		if (noout)

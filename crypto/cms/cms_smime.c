@@ -961,32 +961,32 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	return 0;
 	}
 
-int CMS_timestamp_create(BIO *content, BIO *response, char *dataUri,
-		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
+int CMS_timestamp_create(BIO *in, BIO *token, char *dataUri,
+		char *mediaType, BIO *out, EVP_MD digest_md, unsigned int flags)
 	{
 	CMS_ContentInfo *cms;
 
-	if (!content)
+	if (!in)
 		{
 		if (!dataUri)
 			{
 			CMSerr(CMS_F_CMS_TIMESTAMP_CREATE, CMS_R_CONTENT_NOT_FOUND);
-			return NULL;
+			return 0;
 			}
 		flags |= CMS_DETACHED;
 		}
 
 	cms = cms_TimeStampedData_create();
 	if (!cms)
-		return NULL;
+		return 0;
 
-	if ((flags & CMS_STREAM) || CMS_final(cms, content, NULL, flags))
-		return cms;
+	if ((flags & CMS_STREAM) || CMS_final(cms, in, NULL, flags))
+		return 1;
 
 	err:
 
 	if (cms)
 		CMS_ContentInfo_free(cms);
 
-	return NULL;
+	return 0;
 	}

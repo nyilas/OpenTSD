@@ -184,6 +184,28 @@ static int cms_compute_token_digest(CMS_ContentInfo *token, EVP_MD_CTX *mdContex
 	return 1;
 	}
 
+static int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
+		unsigned char *digest, unsigned digestLength)
+	{
+//	X509_ALGOR *tokenDigestAlgorithm;
+	ASN1_OCTET_STRING *tokenDigest;
+
+//	tokenDigestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
+	tokenDigest = cms_TSTInfo_get0_hashedMessage(tstInfo);
+
+	if (digestLength != (unsigned)tokenDigest->length)
+		{
+		CMSerr(CMS_F_CMS_DIGEST_MATCHING_VERIFY, CMS_R_NO_MATCHING_DIGEST);
+		return 0;
+		}
+	if (memcmp(digest, tokenDigest->data, digestLength) != 0)
+		{
+		CMSerr(CMS_F_CMS_DIGEST_MATCHING_VERIFY, CMS_R_NO_MATCHING_DIGEST);
+		return 0;
+		}
+	return 1;
+	}
+
 //static int cms_compute_content_digest(CMS_ContentInfo *cms, CMS_TSTInfo *tstInfo,
 //		X509_ALGOR **digestAlgorithm,
 //		unsigned char **digest, unsigned *digestLength)
@@ -253,28 +275,6 @@ int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int ex
 	return 0;
 	}
 
-static int cms_digest_matching_verify(CMS_TSTInfo *tstInfo,
-		unsigned char *digest, unsigned digestLength)
-	{
-//	X509_ALGOR *tokenDigestAlgorithm;
-	ASN1_OCTET_STRING *tokenDigest;
-
-//	tokenDigestAlgorithm = cms_TSTInfo_get0_hashAlgorithm(tstInfo);
-	tokenDigest = cms_TSTInfo_get0_hashedMessage(tstInfo);
-
-	if (digestLength != (unsigned)tokenDigest->length)
-		{
-		CMSerr(CMS_F_CMS_DIGEST_MATCHING_VERIFY, CMS_R_NO_MATCHING_DIGEST);
-		return 0;
-		}
-	if (memcmp(digest, tokenDigest->data, digestLength) != 0)
-		{
-		CMSerr(CMS_F_CMS_DIGEST_MATCHING_VERIFY, CMS_R_NO_MATCHING_DIGEST);
-		return 0;
-		}
-	return 1;
-	}
-
 int cms_Token_signature_verify(CMS_ContentInfo *token,
 		STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
 	{
@@ -292,7 +292,7 @@ int cms_Token_signature_verify(CMS_ContentInfo *token,
 	return 1;
 	}
 
-CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, BIO *response,
+CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, BIO *timeStamp,
 		unsigned char *dataUri, STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
 	{
 	CMS_ContentInfo *cms;
