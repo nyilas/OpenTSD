@@ -155,7 +155,8 @@ static CMS_MetaData *get_metaData(char *fileName, char *mediaType,
 		STACK_OF(X509_ATTRIBUTE) *otherMetaData, int flags)
 	{
 		CMS_MetaData *metaData = NULL;
-		metaData = CMS_MetaData_new();
+		//metaData = CMS_MetaData_new();
+		metaData = M_ASN1_new_of(CMS_MetaData);
 		if (!metaData)
 			return NULL;
 		if(flags & CMS_HASH_PROTECTED_METADATA)
