@@ -142,6 +142,30 @@ CMS_MetaData *cms_get0_metaData(CMS_ContentInfo *cms)
 	return cms_get0_timestampedData(cms)->metaData;
 	}
 
+CMS_MetaData *cms_get1_metaData(char *fileName, char *mediaType, int flags)
+	{
+	return cms_get1_metaData(fileName, mediaType, NULL, flags);
+	}
+
+CMS_MetaData *cms_get1_metaData(char *fileName, char *mediaType,
+		STACK_OF(X509_ATTRIBUTE) *otherMetaData, int flags)
+	{
+		CMS_MetaData *metaData = NULL;
+		metaData = CMS_MetaData_new();
+		if (!metaData)
+			return NULL;
+		if(flags & CMS_HASH_PROTECTED_METADATA)
+			metaData->hashProtected = 1;
+		if(!(metaData->fileName = ASN1_UTF8STRING_new())
+				|| !ASN1_STRING_set(metaData->fileName, fileName, strlen(fileName)))
+			return NULL;
+		if(!(metaData->mediaType = ASN1_IA5STRING_new())
+				|| !ASN1_STRING_set(metaData->mediaType, mediaType, strlen(mediaType)))
+			return NULL;
+		metaData->otherMetaData = otherMetaData;
+		return metaData;
+	}
+
 int cms_check_dataUri(CMS_ContentInfo *cms)
 	{
 	ASN1_IA5STRING *dataUri = cms->d.timestampedData->dataUri;
@@ -292,8 +316,8 @@ int cms_Token_signature_verify(CMS_ContentInfo *token,
 	return 1;
 	}
 
-CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, BIO *timeStamp,
-		unsigned char *dataUri, STACK_OF(X509) *certs, X509_STORE *store, unsigned int flags)
+CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, char *dataUri, BIO *token,
+		CMS_MetaData *metaData, unsigned int flags)
 	{
 	CMS_ContentInfo *cms;
 	CMS_TimestampedData *tsd;

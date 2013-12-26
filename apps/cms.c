@@ -113,7 +113,7 @@ int MAIN(int argc, char **argv)
 	char **args;
 	const char *inmode = "r", *outmode = "w";
 	char *infile = NULL, *outfile = NULL, *rctfile = NULL;
-	char *timeStampToken = NULL, *dataUri = NULL, *mediaType = NULL;
+	char *timeStampToken = NULL, *dataUri = NULL, *mediaType = NULL, *fileName;
 	char *signerfile = NULL, *recipfile = NULL;
 	STACK_OF(OPENSSL_STRING) *sksigners = NULL, *skkeys = NULL;
 	char *certfile = NULL, *keyfile = NULL, *contfile=NULL;
@@ -280,7 +280,7 @@ int MAIN(int argc, char **argv)
 		else if (!strcmp (*args, "-crlfeol"))
 				flags |= CMS_CRLFEOL;
 		else if (!strcmp (*args, "-metaData"))
-				flags |= CMS_METADATA;
+				flags |= CMS_HASH_PROTECTED_METADATA;
 		else if (!strcmp (*args, "-noout"))
 				noout = 1;
 		else if (!strcmp (*args, "-receipt_request_print"))
@@ -537,6 +537,12 @@ int MAIN(int argc, char **argv)
 				goto argerr;
 			mediaType = *++args;
 			}
+		else if (!strcmp (*args, "-fileName"))
+			{
+			if (!args[1])
+				goto argerr;
+			fileName = *++args;
+			}
 		else if (!strcmp (*args, "-dataUri"))
 			{
 			if (!args[1])
@@ -692,8 +698,9 @@ int MAIN(int argc, char **argv)
 		BIO_printf(bio_err,  "               the random number generator\n");
 		BIO_printf (bio_err, "cert.pem       recipient certificate(s) for encryption\n");
 		BIO_printf (bio_err, "-timeStamp file input time stamp token");
+		BIO_printf (bio_err, "-fileName arg  file name to add to metaData");
+		BIO_printf (bio_err, "-mediaType arg the content mime type to add to metaData");
 		BIO_printf (bio_err, "-metaData		 hash protect metaData field");
-		BIO_printf (bio_err, "-mediaType arg the content mime type");
 		goto end;
 		}
 
@@ -1205,7 +1212,7 @@ int MAIN(int argc, char **argv)
 		}
 	else if (operation == SMIME_TIMESTAMP_VERIFY)
 		{
-		if (CMS_timestamp_verify(cms, other, store, indata, out, flags) > 0)
+		if (CMS_timeStampedData_verify(cms, other, store, indata, out, flags) > 0)
 			BIO_printf(bio_err, "Timestamp verification successful\n");
 		else
 			{

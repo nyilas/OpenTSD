@@ -867,7 +867,7 @@ CMS_ContentInfo *CMS_compress(BIO *in, int comp_nid, unsigned int flags)
 
 #endif
 
-int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
+int CMS_timeStampedData_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		 X509_STORE *store, BIO *dcont, BIO *out, unsigned int flags)
 	{
 	// timestamp token evidence sequence
@@ -961,10 +961,17 @@ int CMS_timestamp_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	return 0;
 	}
 
-int CMS_timestamp_create(BIO *in, BIO *token, char *dataUri,
-		char *mediaType, BIO *out, EVP_MD digest_md, unsigned int flags)
+int CMS_timeStampedData_request(BIO *in, BIO *token, char *dataUri,
+		char *mediaType, char fileName, BIO *out, EVP_MD digest_md, unsigned int flags)
+{
+	return 0;
+}
+
+int CMS_timeStampedData_create(BIO *in, char *dataUri, BIO *token,
+		char fileName, char *mediaType, BIO *out, unsigned int flags)
 	{
 	CMS_ContentInfo *cms;
+	CMS_MetaData *metaData;
 
 	if (!in)
 		{
@@ -975,8 +982,8 @@ int CMS_timestamp_create(BIO *in, BIO *token, char *dataUri,
 			}
 		flags |= CMS_DETACHED;
 		}
-
-	cms = cms_TimeStampedData_create();
+	metaData = cms_get1_metaData(fileName, mediaType, flags);
+	cms = cms_TimeStampedData_create(in, dataUri, metaData, token, flags);
 	if (!cms)
 		return 0;
 

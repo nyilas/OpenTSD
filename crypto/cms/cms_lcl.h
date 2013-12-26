@@ -744,6 +744,7 @@ int cms_Token_signature_verify(CMS_ContentInfo *token, STACK_OF(X509) *certs,
 int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int extToken);
 int cms_check_dataUri(CMS_ContentInfo *cms);
 CMS_MetaData *cms_get0_metaData(CMS_ContentInfo *cms);
+CMS_MetaData *cms_new_metaData(char *fileName, char* mediaType, int flags);
 int cms_digest_matching_verify(CMS_TSTInfo *tstInfo, unsigned char *digest, unsigned digestLength);
 
 
