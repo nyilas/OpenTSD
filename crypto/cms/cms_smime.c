@@ -151,6 +151,25 @@ static void do_free_upto(BIO *f, BIO *upto)
 		BIO_free_all(f);
 	}
 
+static CMS_MetaData *get0_metaData(char *fileName, char *mediaType,
+		STACK_OF(X509_ATTRIBUTE) *otherMetaData, int flags)
+	{
+		CMS_MetaData *metaData = NULL;
+		metaData = CMS_MetaData_new();
+		if (!metaData)
+			return NULL;
+		if(flags & CMS_HASH_PROTECTED_METADATA)
+			metaData->hashProtected = 1;
+		if(!(metaData->fileName = ASN1_UTF8STRING_new())
+				|| !ASN1_STRING_set(metaData->fileName, fileName, strlen(fileName)))
+			return NULL;
+		if(!(metaData->mediaType = ASN1_IA5STRING_new())
+				|| !ASN1_STRING_set(metaData->mediaType, mediaType, strlen(mediaType)))
+			return NULL;
+		metaData->otherMetaData = otherMetaData;
+		return metaData;
+	}
+
 int CMS_data(CMS_ContentInfo *cms, BIO *out, unsigned int flags)
 	{
 	BIO *cont;
