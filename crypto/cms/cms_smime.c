@@ -151,7 +151,7 @@ static void do_free_upto(BIO *f, BIO *upto)
 		BIO_free_all(f);
 	}
 
-static CMS_MetaData *get0_metaData(char *fileName, char *mediaType,
+static CMS_MetaData *get_metaData(char *fileName, char *mediaType,
 		STACK_OF(X509_ATTRIBUTE) *otherMetaData, int flags)
 	{
 		CMS_MetaData *metaData = NULL;
@@ -1001,7 +1001,7 @@ int CMS_timeStampedData_create(BIO *in, char *dataUri, BIO *token,
 			}
 		flags |= CMS_DETACHED;
 		}
-	metaData = cms_get1_metaData(fileName, mediaType, flags);
+	metaData = get_metaData(fileName, mediaType, NULL, flags);
 	cms = cms_TimeStampedData_create(in, dataUri, metaData, token, flags);
 	if (!cms)
 		return 0;
