@@ -244,8 +244,8 @@ CMS_ContentInfo *CMS_compress(BIO *in, int comp_nid, unsigned int flags);
 
 int CMS_timeStampedData_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		 X509_STORE *store, BIO *dcont, BIO *out, unsigned int flags);
-int CMS_timeStampedData_create(BIO *in, char *dataUri, BIO *token,
-		char fileName, char *mediaType, BIO *out, unsigned int flags);
+int CMS_timeStampedData_create(BIO *in, BIO *token, char *dataUri,
+		char *fileName, char *mediaType, BIO *out, unsigned int flags);
 
 int CMS_set1_eContentType(CMS_ContentInfo *cms, const ASN1_OBJECT *oid);
 const ASN1_OBJECT *CMS_get0_eContentType(CMS_ContentInfo *cms);

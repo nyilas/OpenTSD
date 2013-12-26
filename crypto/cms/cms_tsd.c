@@ -292,8 +292,8 @@ int cms_Token_signature_verify(CMS_ContentInfo *token,
 	return 1;
 	}
 
-CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, char *dataUri, BIO *token,
-		CMS_MetaData *metaData, unsigned int flags)
+CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, char *dataUri,
+		CMS_MetaData *metaData, BIO *token, unsigned int flags)
 	{
 	CMS_ContentInfo *cms;
 	CMS_TimestampedData *tsd;
