@@ -151,26 +151,6 @@ static void do_free_upto(BIO *f, BIO *upto)
 		BIO_free_all(f);
 	}
 
-static CMS_MetaData *get_metaData(char *fileName, char *mediaType,
-		STACK_OF(X509_ATTRIBUTE) *otherMetaData, int flags)
-	{
-		CMS_MetaData *metaData = NULL;
-		//metaData = CMS_MetaData_new();
-		metaData = M_ASN1_new_of(CMS_MetaData);
-		if (!metaData)
-			return NULL;
-		if(flags & CMS_HASH_PROTECTED_METADATA)
-			metaData->hashProtected = 1;
-		if(!(metaData->fileName = ASN1_UTF8STRING_new())
-				|| !ASN1_STRING_set(metaData->fileName, fileName, strlen(fileName)))
-			return NULL;
-		if(!(metaData->mediaType = ASN1_IA5STRING_new())
-				|| !ASN1_STRING_set(metaData->mediaType, mediaType, strlen(mediaType)))
-			return NULL;
-		metaData->otherMetaData = otherMetaData;
-		return metaData;
-	}
-
 int CMS_data(CMS_ContentInfo *cms, BIO *out, unsigned int flags)
 	{
 	BIO *cont;
@@ -902,7 +882,7 @@ int CMS_timeStampedData_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	/* contentType checking */
 	if (OBJ_obj2nid(CMS_get0_type(cms)) != NID_id_smime_ct_timestampedData)
 		{
-		CMSerr(CMS_F_CMS_TIMESTAMP_VERIFY, CMS_R_TYPE_NOT_TIMESTAMPED_DATA);
+		CMSerr(CMS_F_CMS_TIMESTAMPEDDATA_VERIFY, CMS_R_TYPE_NOT_TIMESTAMPED_DATA);
 		return 0;
 		}
 
@@ -910,14 +890,14 @@ int CMS_timeStampedData_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	version = cms->d.timestampedData->version;
 	if (ASN1_INTEGER_get(version) != 1)
 		{
-		CMSerr(CMS_F_CMS_TIMESTAMP_VERIFY, CMS_R_UNSUPPORTED_VERSION);
+		CMSerr(CMS_F_CMS_TIMESTAMPEDDATA_VERIFY, CMS_R_UNSUPPORTED_VERSION);
 		return 0;
 		}
 
 	/* content checking (this is the original file) */
 	if (!check_content(cms) && !cms_check_dataUri(cms))
 		{
-		CMSerr(CMS_F_CMS_TIMESTAMP_VERIFY, CMS_R_CONTENT_NOT_FOUND);
+		CMSerr(CMS_F_CMS_TIMESTAMPEDDATA_VERIFY, CMS_R_CONTENT_NOT_FOUND);
 		return 0;
 		}
 
@@ -925,7 +905,7 @@ int CMS_timeStampedData_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	tstEvidenceSequence = cms_get0_timeStampTokenChain(cms);
 	if (sk_CMS_TimeStampAndCRL_num(tstEvidenceSequence) <= 0)
 		{
-		CMSerr(CMS_F_CMS_TIMESTAMP_VERIFY, CMS_R_NO_TIMESTAMP_TOKEN_EVIDENCE);
+		CMSerr(CMS_F_CMS_TIMESTAMPEDDATA_VERIFY, CMS_R_NO_TIMESTAMP_TOKEN_EVIDENCE);
 		return 0;
 		}
 
@@ -955,7 +935,7 @@ int CMS_timeStampedData_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		tmpin = BIO_new_mem_buf(ptr, len);
 		if (tmpin == NULL)
 			{
-			CMSerr(CMS_F_CMS_TIMESTAMP_VERIFY, ERR_R_MALLOC_FAILURE);
+			CMSerr(CMS_F_CMS_TIMESTAMPEDDATA_VERIFY, ERR_R_MALLOC_FAILURE);
 			return 0;
 			}
 		}
@@ -997,7 +977,7 @@ int CMS_timeStampedData_create(BIO *in, BIO *token, char *dataUri,
 		{
 		if (!dataUri)
 			{
-			CMSerr(CMS_F_CMS_TIMESTAMP_CREATE, CMS_R_CONTENT_NOT_FOUND);
+			CMSerr(CMS_F_CMS_TIMESTAMPEDDATA_CREATE, CMS_R_CONTENT_NOT_FOUND);
 			return 0;
 			}
 		flags |= CMS_DETACHED;
