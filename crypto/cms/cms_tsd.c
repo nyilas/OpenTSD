@@ -142,13 +142,13 @@ CMS_MetaData *cms_get0_metaData(CMS_ContentInfo *cms)
 	return cms_get0_timestampedData(cms)->metaData;
 	}
 
-CMS_MetaData *cms_metaData_init(char *fileName, char *mediaType,
-		STACK_OF(X509_ATTRIBUTE) *otherMetaData, int flags)
+static int *cms_metaData_init(CMS_MetaData *metaData, char *fileName,
+		char *mediaType, int flags)
 	{
 		//metaData = CMS_MetaData_new();
-		CMS_MetaData *metaData = M_ASN1_new_of(CMS_MetaData);
+		metaData = M_ASN1_new_of(CMS_MetaData);
 		if (!metaData)
-			return NULL;
+			return 0;
 		if(flags & CMS_HASH_PROTECTED_METADATA)
 			*(metaData->hashProtected) = 1;
 		if(!(metaData->fileName = ASN1_UTF8STRING_new())
@@ -162,14 +162,14 @@ CMS_MetaData *cms_metaData_init(char *fileName, char *mediaType,
 			if (!metaData->otherMetaData )
 				goto mderr;
 		}
-		return metaData;
+		return 1;
 
 		mderr:
 		CMSerr(CMS_F_CMS_METADATA_INIT, ERR_R_MALLOC_FAILURE);
 		err:
 		if(metaData)
 			M_ASN1_free_of(metaData, CMS_MetaData);
-		return NULL;
+		return 0;
 
 	}
 
@@ -324,10 +324,11 @@ int cms_Token_signature_verify(CMS_ContentInfo *token,
 	}
 
 CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, char *dataUri,
-		CMS_MetaData *metaData, BIO *token, unsigned int flags)
+		char *fileName, char *mediaType, BIO *token, unsigned int flags)
 	{
 	CMS_ContentInfo *cms;
 	CMS_TimestampedData *tsd;
+	CMS_MetaData *metaData;
 
 	cms = CMS_ContentInfo_new();
 	if (!cms)
@@ -350,9 +351,10 @@ CMS_ContentInfo *cms_TimeStampedData_create(BIO *content, char *dataUri,
 		if (!ASN1_STRING_set(tsd->dataUri, dataUri, strlen(dataUri)))
 			goto err;
 		}
+	if(!cms_metaData_init(metaData, fileName, mediaType, flags))
+		goto err;
 
 	err:
-
 	if (tsd)
 		M_ASN1_free_of(tsd, CMS_TimestampedData);
 
