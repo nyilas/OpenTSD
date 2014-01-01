@@ -153,13 +153,24 @@ CMS_MetaData *cms_metaData_init(char *fileName, char *mediaType,
 			*(metaData->hashProtected) = 1;
 		if(!(metaData->fileName = ASN1_UTF8STRING_new())
 				|| !ASN1_STRING_set(metaData->fileName, fileName, strlen(fileName)))
-			return NULL;
+			goto err;
 		if(!(metaData->mediaType = ASN1_IA5STRING_new())
 				|| !ASN1_STRING_set(metaData->mediaType, mediaType, strlen(mediaType)))
-			return NULL;
-		if (!flags & NOATTR)
-		metaData->otherMetaData = sk_X509_ATTRIBUTE_new_null();
+			goto err;
+		if (!(flags & CMS_NOATTR)) {
+			metaData->otherMetaData = sk_X509_ATTRIBUTE_new_null();
+			if (!metaData->otherMetaData )
+				goto mderr;
+		}
 		return metaData;
+
+		mderr:
+		CMSerr(CMS_F_CMS_METADATA_INIT, ERR_R_MALLOC_FAILURE);
+		err:
+		if(metaData)
+			M_ASN1_free_of(metaData, CMS_MetaData);
+		return NULL;
+
 	}
 
 int cms_check_dataUri(CMS_ContentInfo *cms)
