@@ -244,8 +244,8 @@ CMS_ContentInfo *CMS_compress(BIO *in, int comp_nid, unsigned int flags);
 
 int CMS_timeStampedData_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		 X509_STORE *store, BIO *dcont, BIO *out, unsigned int flags);
-int CMS_timeStampedData_create(BIO *in, BIO *token, char *dataUri,
-		char *fileName, char *mediaType, BIO *out, unsigned int flags);
+int CMS_timeStampedData_create(BIO *content, char *dataUri,
+		char *fileName, char *mediaType, BIO *token, unsigned int flags);
 
 int CMS_set1_eContentType(CMS_ContentInfo *cms, const ASN1_OBJECT *oid);
 const ASN1_OBJECT *CMS_get0_eContentType(CMS_ContentInfo *cms);
@@ -395,6 +395,7 @@ void ERR_load_CMS_strings(void);
 #define CMS_F_CMS_GET0_TIMESTAMPEDDATA			 177
 #define CMS_F_CMS_GET_TOKEN				 178
 #define CMS_F_CMS_METADATA_ENCODE			 179
+#define CMS_F_CMS_METADATA_INIT				 183
 #define CMS_F_CMS_MSGSIGDIGEST_ADD1			 162
 #define CMS_F_CMS_RECEIPTREQUEST_CREATE0		 159
 #define CMS_F_CMS_RECEIPT_VERIFY			 160
@@ -423,6 +424,8 @@ void ERR_load_CMS_strings(void);
 #define CMS_F_CMS_SIGNERINFO_VERIFY_CONTENT		 154
 #define CMS_F_CMS_SIGN_RECEIPT				 163
 #define CMS_F_CMS_STREAM				 155
+#define CMS_F_CMS_TIMESTAMPEDDATA_CREATE		 181
+#define CMS_F_CMS_TIMESTAMPEDDATA_VERIFY		 182
 #define CMS_F_CMS_TIMESTAMP_CREATE			 180
 #define CMS_F_CMS_TIMESTAMP_VERIFY			 169
 #define CMS_F_CMS_TOKEN_DIGEST_VERIFY			 175
