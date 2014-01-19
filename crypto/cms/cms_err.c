@@ -145,7 +145,11 @@ static ERR_STRING_DATA CMS_str_functs[]=
 {ERR_FUNC(CMS_F_CMS_SIGNERINFO_VERIFY_CONTENT),	"CMS_SignerInfo_verify_content"},
 {ERR_FUNC(CMS_F_CMS_SIGN_RECEIPT),	"CMS_sign_receipt"},
 {ERR_FUNC(CMS_F_CMS_STREAM),	"CMS_stream"},
+<<<<<<< HEAD
 {ERR_FUNC(CMS_F_CMS_TIMESTAMPEDDATA_CREATE),	"CMS_timeStampedData_create"},
+=======
+{ERR_FUNC(CMS_F_CMS_TIMESTAMPEDDATA_CREATE),	"cms_TimeStampedData_create"},
+>>>>>>> branch 'master' of https://github.com/nyilas/OpenTSD.git
 {ERR_FUNC(CMS_F_CMS_TIMESTAMPEDDATA_VERIFY),	"CMS_timeStampedData_verify"},
 {ERR_FUNC(CMS_F_CMS_TIMESTAMP_CREATE),	"CMS_TIMESTAMP_CREATE"},
 {ERR_FUNC(CMS_F_CMS_TIMESTAMP_VERIFY),	"CMS_timestamp_verify"},

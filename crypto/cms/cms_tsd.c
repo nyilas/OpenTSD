@@ -319,6 +319,7 @@ int cms_Token_signature_verify(CMS_ContentInfo *token,
 	return 1;
 	}
 
+
 int cms_TimeStampedData_init(BIO *content, char *dataUri,
 		char *fileName, char *mediaType, BIO *token, unsigned int flags)
 	{
