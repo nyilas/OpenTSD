@@ -967,13 +967,13 @@ int CMS_timeStampedData_request(BIO *in, BIO *token, char *dataUri,
 	return 0;
 }
 
-int CMS_timeStampedData_create(BIO *in, BIO *token, char *dataUri,
+int CMS_timeStampedData_create(BIO *content, BIO *token, char *dataUri,
 		char *fileName, char *mediaType, BIO *out, unsigned int flags)
 	{
 	CMS_ContentInfo *cms;
 	CMS_MetaData *metaData;
 
-	if (!in)
+	if (!content)
 	{
 		if (!dataUri)
 
