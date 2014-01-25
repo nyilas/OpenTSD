@@ -986,12 +986,13 @@ int CMS_timeStampedData_create(BIO *in, BIO *token, char *dataUri,
 
 
 	cms = CMS_ContentInfo_new();
-	if (!cms || !CMS_SignedData_init(cms))
+	if (!cms || !cms_TimeStampedData_init(cms, content, dataUri, token, flags))
 		goto merr;
 
 	metaData = M_ASN1_new_of(CMS_MetaData);	
-	if (!metaData || !cms_metaData_init(metaData, mediaType, NULL, flags))
+	if (!metaData || !cms_metaData_init(metaData, fileName, mediaType, flags))
 		goto err;
+	cms->metaData = metaData;
 
 	if ((flags & CMS_STREAM) || CMS_final(cms, in, NULL, flags))
 		return 1;
