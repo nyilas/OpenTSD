@@ -990,10 +990,7 @@ int CMS_timeStampedData_create(BIO *in, BIO *token, char *dataUri,
 		goto merr;
 
 	metaData = M_ASN1_new_of(CMS_MetaData);	
-	if (!metaData || !cms_MetaData_init(fileName, mediaType, NULL, flags))
-		goto err;
-
-	if (!metaData)
+	if (!metaData || !cms_metaData_init(metaData, mediaType, NULL, flags))
 		goto err;
 
 	if ((flags & CMS_STREAM) || CMS_final(cms, in, NULL, flags))
