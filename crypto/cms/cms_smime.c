@@ -976,6 +976,7 @@ int CMS_timeStampedData_create(BIO *in, BIO *token, char *dataUri,
 	if (!in)
 	{
 		if (!dataUri)
+
 		{
 			CMSerr(CMS_F_CMS_TIMESTAMPEDDATA_CREATE, CMS_R_CONTENT_NOT_FOUND);
 			return 0;
