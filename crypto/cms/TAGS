@@ -1,0 +1,739 @@
+
+cms.h,9759
+#define HEADER_CMS_H56,2580
+typedef struct CMS_ContentInfo_st CMS_ContentInfo;69,2724
+typedef struct CMS_SignerInfo_st CMS_SignerInfo;70,2775
+typedef struct CMS_CertificateChoices CMS_CertificateChoices;71,2824
+typedef struct CMS_RevocationInfoChoice_st CMS_RevocationInfoChoice;72,2886
+typedef struct CMS_RecipientInfo_st CMS_RecipientInfo;73,2955
+typedef struct CMS_ReceiptRequest_st CMS_ReceiptRequest;74,3010
+typedef struct CMS_Receipt_st CMS_Receipt;75,3067
+DECLARE_STACK_OF(77,3111
+#define CMS_SIGNERINFO_ISSUER_SERIAL	83,3305
+#define CMS_SIGNERINFO_KEYIDENTIFIER	84,3344
+#define CMS_RECIPINFO_TRANS	86,3384
+#define CMS_RECIPINFO_AGREE	87,3415
+#define CMS_RECIPINFO_KEK	88,3446
+#define CMS_RECIPINFO_PASS	89,3475
+#define CMS_RECIPINFO_OTHER	90,3505
+#define CMS_TEXT	94,3565
+#define CMS_NOCERTS	95,3588
+#define CMS_NO_CONTENT_VERIFY	96,3614
+#define CMS_NO_ATTR_VERIFY	97,3649
+#define CMS_NOSIGS	98,3681
+#define CMS_NOINTERN	100,3750
+#define CMS_NO_SIGNER_CERT_VERIFY	101,3778
+#define CMS_NOVERIFY	102,3817
+#define CMS_DETACHED	103,3845
+#define CMS_BINARY	104,3873
+#define CMS_NOATTR	105,3899
+#define	CMS_NOSMIMECAP	106,3926
+#define CMS_NOOLDMIMETYPE	107,3957
+#define CMS_CRLFEOL	108,3990
+#define CMS_STREAM	109,4018
+#define CMS_NOCRL	110,4046
+#define CMS_PARTIAL	111,4073
+#define CMS_REUSE_DIGEST	112,4102
+#define CMS_USE_KEYID	113,4135
+#define CMS_DEBUG_DECRYPT	114,4167
+#define CMS_TIMESTAMP_VERIFY	115,4202
+#define CMS_EXT_TOKEN	116,4239
+#define CMS_HASH_PROTECTED_METADATA	117,4271
+#define CMS_F_CHECK_CONTENT	352,13716
+#define CMS_F_CMS_ADD0_CERT	353,13751
+#define CMS_F_CMS_ADD0_RECIPIENT_KEY	354,13787
+#define CMS_F_CMS_ADD0_RECIPIENT_PASSWORD	355,13831
+#define CMS_F_CMS_ADD1_RECEIPTREQUEST	356,13879
+#define CMS_F_CMS_ADD1_RECIPIENT_CERT	357,13924
+#define CMS_F_CMS_ADD1_SIGNER	358,13969
+#define CMS_F_CMS_ADD1_SIGNINGTIME	359,14007
+#define CMS_F_CMS_COMPRESS	360,14049
+#define CMS_F_CMS_COMPRESSEDDATA_CREATE	361,14084
+#define CMS_F_CMS_COMPRESSEDDATA_INIT_BIO	362,14131
+#define CMS_F_CMS_COMPUTE_DIGEST	363,14179
+#define CMS_F_CMS_COPY_CONTENT	364,14219
+#define CMS_F_CMS_COPY_MESSAGEDIGEST	365,14258
+#define CMS_F_CMS_DATA	366,14302
+#define CMS_F_CMS_DATAFINAL	367,14334
+#define CMS_F_CMS_DATAINIT	368,14370
+#define CMS_F_CMS_DECRYPT	369,14405
+#define CMS_F_CMS_DECRYPT_SET1_KEY	370,14439
+#define CMS_F_CMS_DECRYPT_SET1_PASSWORD	371,14481
+#define CMS_F_CMS_DECRYPT_SET1_PKEY	372,14528
+#define CMS_F_CMS_DIGESTALGORITHM_FIND_CTX	373,14571
+#define CMS_F_CMS_DIGESTALGORITHM_INIT_BIO	374,14620
+#define CMS_F_CMS_DIGESTEDDATA_DO_FINAL	375,14669
+#define CMS_F_CMS_DIGEST_MATCHING_VERIFY	376,14716
+#define CMS_F_CMS_DIGEST_VERIFY	377,14763
+#define CMS_F_CMS_ENCODE_RECEIPT	378,14803
+#define CMS_F_CMS_ENCRYPT	379,14843
+#define CMS_F_CMS_ENCRYPTEDCONTENT_INIT_BIO	380,14877
+#define CMS_F_CMS_ENCRYPTEDDATA_DECRYPT	381,14927
+#define CMS_F_CMS_ENCRYPTEDDATA_ENCRYPT	382,14974
+#define CMS_F_CMS_ENCRYPTEDDATA_SET1_KEY	383,15021
+#define CMS_F_CMS_ENVELOPEDDATA_CREATE	384,15068
+#define CMS_F_CMS_ENVELOPEDDATA_INIT_BIO	385,15114
+#define CMS_F_CMS_ENVELOPED_DATA_INIT	386,15161
+#define CMS_F_CMS_FINAL	387,15206
+#define CMS_F_CMS_GET0_CERTIFICATE_CHOICES	388,15239
+#define CMS_F_CMS_GET0_CONTENT	389,15288
+#define CMS_F_CMS_GET0_ECONTENT_TYPE	390,15327
+#define CMS_F_CMS_GET0_ENVELOPED	391,15371
+#define CMS_F_CMS_GET0_EVIDENCE	392,15411
+#define CMS_F_CMS_GET0_REVOCATION_CHOICES	393,15451
+#define CMS_F_CMS_GET0_SIGNED	394,15499
+#define CMS_F_CMS_GET0_TIMESTAMPEDDATA	395,15537
+#define CMS_F_CMS_GET_TOKEN	396,15583
+#define CMS_F_CMS_METADATA_ENCODE	397,15619
+#define CMS_F_CMS_METADATA_INIT	398,15660
+#define CMS_F_CMS_MSGSIGDIGEST_ADD1	399,15700
+#define CMS_F_CMS_RECEIPTREQUEST_CREATE0	400,15743
+#define CMS_F_CMS_RECEIPT_VERIFY	401,15790
+#define CMS_F_CMS_RECIPIENTINFO_DECRYPT	402,15830
+#define CMS_F_CMS_RECIPIENTINFO_KEKRI_DECRYPT	403,15877
+#define CMS_F_CMS_RECIPIENTINFO_KEKRI_ENCRYPT	404,15929
+#define CMS_F_CMS_RECIPIENTINFO_KEKRI_GET0_ID	405,15981
+#define CMS_F_CMS_RECIPIENTINFO_KEKRI_ID_CMP	406,16033
+#define CMS_F_CMS_RECIPIENTINFO_KTRI_CERT_CMP	407,16084
+#define CMS_F_CMS_RECIPIENTINFO_KTRI_DECRYPT	408,16136
+#define CMS_F_CMS_RECIPIENTINFO_KTRI_ENCRYPT	409,16187
+#define CMS_F_CMS_RECIPIENTINFO_KTRI_GET0_ALGS	410,16238
+#define CMS_F_CMS_RECIPIENTINFO_KTRI_GET0_SIGNER_ID	411,16291
+#define CMS_F_CMS_RECIPIENTINFO_PWRI_CRYPT	412,16348
+#define CMS_F_CMS_RECIPIENTINFO_SET0_KEY	413,16397
+#define CMS_F_CMS_RECIPIENTINFO_SET0_PASSWORD	414,16444
+#define CMS_F_CMS_RECIPIENTINFO_SET0_PKEY	415,16496
+#define CMS_F_CMS_SET1_SIGNERIDENTIFIER	416,16544
+#define CMS_F_CMS_SET_DETACHED	417,16591
+#define CMS_F_CMS_SIGN	418,16630
+#define CMS_F_CMS_SIGNED_DATA_INIT	419,16662
+#define CMS_F_CMS_SIGNERINFO_CONTENT_SIGN	420,16704
+#define CMS_F_CMS_SIGNERINFO_SIGN	421,16752
+#define CMS_F_CMS_SIGNERINFO_VERIFY	422,16793
+#define CMS_F_CMS_SIGNERINFO_VERIFY_CERT	423,16836
+#define CMS_F_CMS_SIGNERINFO_VERIFY_CONTENT	424,16883
+#define CMS_F_CMS_SIGN_RECEIPT	425,16933
+#define CMS_F_CMS_STREAM	426,16972
+#define CMS_F_CMS_TIMESTAMPEDDATA_CREATE	427,17005
+#define CMS_F_CMS_TIMESTAMPEDDATA_VERIFY	428,17052
+#define CMS_F_CMS_TIMESTAMP_CREATE	429,17099
+#define CMS_F_CMS_TIMESTAMP_VERIFY	430,17141
+#define CMS_F_CMS_TOKEN_DIGEST_VERIFY	431,17183
+#define CMS_F_CMS_TOKEN_SIGNATURE_VERIFY	432,17228
+#define CMS_F_CMS_TOKEN_VERIFY	433,17275
+#define CMS_F_CMS_TSTINFO_DECODE	434,17314
+#define CMS_F_CMS_UNCOMPRESS	435,17354
+#define CMS_F_CMS_VERIFY	436,17391
+#define CMS_R_ADD_SIGNER_ERROR	439,17445
+#define CMS_R_CERTIFICATE_ALREADY_PRESENT	440,17483
+#define CMS_R_CERTIFICATE_HAS_NO_KEYID	441,17531
+#define CMS_R_CERTIFICATE_VERIFY_ERROR	442,17577
+#define CMS_R_CIPHER_INITIALISATION_ERROR	443,17623
+#define CMS_R_CIPHER_PARAMETER_INITIALISATION_ERROR	444,17671
+#define CMS_R_CMS_DATAFINAL_ERROR	445,17728
+#define CMS_R_CMS_LIB	446,17769
+#define CMS_R_CONTENTIDENTIFIER_MISMATCH	447,17800
+#define CMS_R_CONTENT_NOT_FOUND	448,17847
+#define CMS_R_CONTENT_TYPE_MISMATCH	449,17887
+#define CMS_R_CONTENT_TYPE_NOT_COMPRESSED_DATA	450,17930
+#define CMS_R_CONTENT_TYPE_NOT_ENVELOPED_DATA	451,17983
+#define CMS_R_CONTENT_TYPE_NOT_SIGNED_DATA	452,18035
+#define CMS_R_CONTENT_TYPE_NOT_TIMESTAMPED_DATA	453,18084
+#define CMS_R_CONTENT_TYPE_NOT_TSTINFO	454,18138
+#define CMS_R_CONTENT_VERIFY_ERROR	455,18184
+#define CMS_R_CTRL_ERROR	456,18226
+#define CMS_R_CTRL_FAILURE	457,18259
+#define CMS_R_DECRYPT_ERROR	458,18294
+#define CMS_R_DIGEST_ERROR	459,18330
+#define CMS_R_ERROR_GETTING_PUBLIC_KEY	460,18365
+#define CMS_R_ERROR_READING_MESSAGEDIGEST_ATTRIBUTE	461,18411
+#define CMS_R_ERROR_SETTING_KEY	462,18468
+#define CMS_R_ERROR_SETTING_RECIPIENTINFO	463,18508
+#define CMS_R_INVALID_ENCRYPTED_KEY_LENGTH	464,18556
+#define CMS_R_INVALID_KEY_ENCRYPTION_PARAMETER	465,18605
+#define CMS_R_INVALID_KEY_LENGTH	466,18658
+#define CMS_R_MD_BIO_INIT_ERROR	467,18698
+#define CMS_R_MESSAGEDIGEST_ATTRIBUTE_WRONG_LENGTH	468,18738
+#define CMS_R_MESSAGEDIGEST_WRONG_LENGTH	469,18794
+#define CMS_R_MSGSIGDIGEST_ERROR	470,18841
+#define CMS_R_MSGSIGDIGEST_VERIFICATION_FAILURE	471,18881
+#define CMS_R_MSGSIGDIGEST_WRONG_LENGTH	472,18935
+#define CMS_R_NEED_ONE_SIGNER	473,18982
+#define CMS_R_NOT_A_SIGNED_RECEIPT	474,19020
+#define CMS_R_NOT_ENCRYPTED_DATA	475,19062
+#define CMS_R_NOT_KEK	476,19102
+#define CMS_R_NOT_KEY_TRANSPORT	477,19133
+#define CMS_R_NOT_PWRI	478,19173
+#define CMS_R_NOT_SUPPORTED_FOR_THIS_KEY_TYPE	479,19205
+#define CMS_R_NO_CIPHER	480,19257
+#define CMS_R_NO_CONTENT	481,19290
+#define CMS_R_NO_CONTENT_TYPE	482,19323
+#define CMS_R_NO_DEFAULT_DIGEST	483,19361
+#define CMS_R_NO_DIGEST_SET	484,19401
+#define CMS_R_NO_KEY	485,19437
+#define CMS_R_NO_KEY_OR_CERT	486,19467
+#define CMS_R_NO_MATCHING_DIGEST	487,19504
+#define CMS_R_NO_MATCHING_RECIPIENT	488,19544
+#define CMS_R_NO_MATCHING_SIGNATURE	489,19587
+#define CMS_R_NO_MSGSIGDIGEST	490,19630
+#define CMS_R_NO_PASSWORD	491,19668
+#define CMS_R_NO_PRIVATE_KEY	492,19702
+#define CMS_R_NO_PUBLIC_KEY	493,19739
+#define CMS_R_NO_RECEIPT_REQUEST	494,19775
+#define CMS_R_NO_SIGNERS	495,19815
+#define CMS_R_NO_SINGLE_SIGNERS	496,19848
+#define CMS_R_NO_TIMESTAMP_TOKEN_EVIDENCE	497,19888
+#define CMS_R_NULL_TIMESTAMP_TOKEN	498,19936
+#define CMS_R_PRIVATE_KEY_DOES_NOT_MATCH_CERTIFICATE	499,19978
+#define CMS_R_RECEIPT_DECODE_ERROR	500,20036
+#define CMS_R_RECIPIENT_ERROR	501,20078
+#define CMS_R_SIGNER_CERTIFICATE_NOT_FOUND	502,20116
+#define CMS_R_SIGNFINAL_ERROR	503,20165
+#define CMS_R_SMIME_TEXT_ERROR	504,20203
+#define CMS_R_STORE_INIT_ERROR	505,20242
+#define CMS_R_TSTINFO_CHECK_FAIL	506,20281
+#define CMS_R_TYPE_NOT_COMPRESSED_DATA	507,20321
+#define CMS_R_TYPE_NOT_DATA	508,20367
+#define CMS_R_TYPE_NOT_DIGESTED_DATA	509,20403
+#define CMS_R_TYPE_NOT_ENCRYPTED_DATA	510,20447
+#define CMS_R_TYPE_NOT_ENVELOPED_DATA	511,20492
+#define CMS_R_TYPE_NOT_TIMESTAMPED_DATA	512,20537
+#define CMS_R_UNABLE_TO_FINALIZE_CONTEXT	513,20584
+#define CMS_R_UNKNOWN_CIPHER	514,20631
+#define CMS_R_UNKNOWN_DIGEST_ALGORIHM	515,20668
+#define CMS_R_UNKNOWN_ID	516,20713
+#define CMS_R_UNSUPPORTED_COMPRESSION_ALGORITHM	517,20746
+#define CMS_R_UNSUPPORTED_CONTENT_TYPE	518,20800
+#define CMS_R_UNSUPPORTED_KEK_ALGORITHM	519,20846
+#define CMS_R_UNSUPPORTED_KEY_ENCRYPTION_ALGORITHM	520,20893
+#define CMS_R_UNSUPPORTED_RECIPIENT_TYPE	521,20949
+#define CMS_R_UNSUPPORTED_RECPIENTINFO_TYPE	522,20996
+#define CMS_R_UNSUPPORTED_TYPE	523,21046
+#define CMS_R_UNSUPPORTED_VERSION	524,21085
+#define CMS_R_UNWRAP_ERROR	525,21126
+#define CMS_R_UNWRAP_FAILURE	526,21161
+#define CMS_R_VERIFICATION_FAILURE	527,21198
+#define CMS_R_WRAP_ERROR	528,21240
+
+cms_lcl.h,12899
+#define HEADER_CMS_LCL_H59,2715
+typedef struct CMS_IssuerAndSerialNumber_st CMS_IssuerAndSerialNumber;74,2939
+typedef struct CMS_EncapsulatedContentInfo_st CMS_EncapsulatedContentInfo;75,3010
+typedef struct CMS_SignerIdentifier_st CMS_SignerIdentifier;76,3085
+typedef struct CMS_SignedData_st CMS_SignedData;77,3146
+typedef struct CMS_OtherRevocationInfoFormat_st CMS_OtherRevocationInfoFormat;78,3195
+typedef struct CMS_OriginatorInfo_st CMS_OriginatorInfo;79,3274
+typedef struct CMS_EncryptedContentInfo_st CMS_EncryptedContentInfo;80,3331
+typedef struct CMS_EnvelopedData_st CMS_EnvelopedData;81,3400
+typedef struct CMS_DigestedData_st CMS_DigestedData;82,3455
+typedef struct CMS_EncryptedData_st CMS_EncryptedData;83,3508
+typedef struct CMS_AuthenticatedData_st CMS_AuthenticatedData;84,3563
+typedef struct CMS_CompressedData_st CMS_CompressedData;85,3626
+typedef struct CMS_OtherCertificateFormat_st CMS_OtherCertificateFormat;86,3683
+typedef struct CMS_KeyTransRecipientInfo_st CMS_KeyTransRecipientInfo;87,3756
+typedef struct CMS_OriginatorPublicKey_st CMS_OriginatorPublicKey;88,3827
+typedef struct CMS_OriginatorIdentifierOrKey_st CMS_OriginatorIdentifierOrKey;89,3894
+typedef struct CMS_KeyAgreeRecipientInfo_st CMS_KeyAgreeRecipientInfo;90,3973
+typedef struct CMS_OtherKeyAttribute_st CMS_OtherKeyAttribute;91,4044
+typedef struct CMS_RecipientKeyIdentifier_st CMS_RecipientKeyIdentifier;92,4107
+typedef struct CMS_KeyAgreeRecipientIdentifier_st CMS_KeyAgreeRecipientIdentifier;93,4180
+typedef struct CMS_RecipientEncryptedKey_st CMS_RecipientEncryptedKey;94,4263
+typedef struct CMS_KEKIdentifier_st CMS_KEKIdentifier;95,4334
+typedef struct CMS_KEKRecipientInfo_st CMS_KEKRecipientInfo;96,4389
+typedef struct CMS_PasswordRecipientInfo_st CMS_PasswordRecipientInfo;97,4450
+typedef struct CMS_OtherRecipientInfo_st CMS_OtherRecipientInfo;98,4521
+typedef struct CMS_ReceiptsFrom_st CMS_ReceiptsFrom;99,4586
+typedef struct CMS_TimestampedData_st CMS_TimestampedData;101,4675
+typedef struct CMS_MetaData_st CMS_MetaData;102,4734
+typedef struct CMS_Evidence_st CMS_Evidence;103,4779
+typedef struct CMS_TimeStampTokenEvidence_st CMS_TimeStampTokenEvidence;104,4824
+typedef struct CMS_TimeStampAndCRL_st CMS_TimeStampAndCRL;105,4897
+typedef struct CMS_EvidenceRecord_st CMS_EvidenceRecord;106,4956
+typedef struct CMS_EncryptionInfo_st CMS_EncryptionInfo;107,5013
+typedef struct CMS_ArchiveTimeStamp_st CMS_ArchiveTimeStamp;108,5070
+typedef struct CMS_ArchiveTimeStampChain_st CMS_ArchiveTimeStampChain;109,5131
+typedef struct CMS_OtherEvidence_st CMS_OtherEvidence;110,5202
+typedef struct CMS_TimeStampResp_st CMS_TimeStampResp;111,5257
+typedef struct CMS_PKIStatusInfo_st CMS_PKIStatusInfo;112,5312
+typedef struct CMS_TSTInfo_st CMS_TSTInfo;113,5367
+typedef struct CMS_MessageImprint_st CMS_MessageImprint;114,5410
+typedef struct CMS_Accuracy_st CMS_Accuracy;115,5467
+struct CMS_ContentInfo_st117,5513
+	ASN1_OBJECT *contentType;contentType119,5542
+		ASN1_OCTET_STRING *data;data121,5578
+		CMS_SignedData *signedData;signedData122,5605
+		CMS_EnvelopedData *envelopedData;envelopedData123,5635
+		CMS_DigestedData *digestedData;digestedData124,5671
+		CMS_EncryptedData *encryptedData;encryptedData125,5705
+		CMS_AuthenticatedData *authenticatedData;authenticatedData126,5741
+		CMS_CompressedData *compressedData;compressedData127,5785
+		CMS_TimestampedData *timestampedData;timestampedData128,5823
+		ASN1_TYPE *other;other129,5863
+		void *otherData;otherData131,5907
+		} d;132,5926
+struct CMS_SignedData_st135,5938
+	long version;137,5966
+	STACK_OF(138,5981
+struct CMS_EncapsulatedContentInfo_st145,6208
+	ASN1_OBJECT *eContentType;eContentType147,6249
+	ASN1_OCTET_STRING *eContent;eContent148,6277
+	int partial;150,6364
+struct CMS_SignerInfo_st153,6383
+	long version;155,6411
+	CMS_SignerIdentifier *sid;sid156,6426
+	X509_ALGOR *digestAlgorithm;digestAlgorithm157,6454
+	STACK_OF(158,6484
+struct CMS_SignerIdentifier_st167,6702
+	int type;169,6736
+		CMS_IssuerAndSerialNumber *issuerAndSerialNumber;issuerAndSerialNumber171,6756
+		ASN1_OCTET_STRING *subjectKeyIdentifier;subjectKeyIdentifier172,6808
+		} d;173,6851
+struct CMS_EnvelopedData_st176,6863
+	long version;178,6894
+	CMS_OriginatorInfo *originatorInfo;originatorInfo179,6909
+	STACK_OF(180,6946
+struct CMS_OriginatorInfo_st185,7091
+	STACK_OF(187,7123
+struct CMS_EncryptedContentInfo_st191,7220
+	ASN1_OBJECT *contentType;contentType193,7258
+	X509_ALGOR *contentEncryptionAlgorithm;contentEncryptionAlgorithm194,7285
+	ASN1_OCTET_STRING *encryptedContent;encryptedContent195,7326
+	const EVP_CIPHER *cipher;cipher197,7408
+	unsigned char *key;key198,7435
+	size_t keylen;199,7456
+	int debug;201,7544
+struct CMS_RecipientInfo_st204,7561
+ 	int type;206,7592
+  	 	CMS_KeyTransRecipientInfo *ktri;ktri208,7614
+   		CMS_KeyAgreeRecipientInfo *kari;kari209,7652
+   		CMS_KEKRecipientInfo *kekri;kekri210,7690
+		CMS_PasswordRecipientInfo *pwri;pwri211,7724
+		CMS_OtherRecipientInfo *ori;ori212,7759
+		} d;213,7790
+typedef CMS_SignerIdentifier CMS_RecipientIdentifier;216,7802
+struct CMS_KeyTransRecipientInfo_st218,7857
+	long version;220,7896
+	CMS_RecipientIdentifier *rid;rid221,7911
+	X509_ALGOR *keyEncryptionAlgorithm;keyEncryptionAlgorithm222,7942
+	ASN1_OCTET_STRING *encryptedKey;encryptedKey223,7979
+	X509 *recip;recip225,8043
+	EVP_PKEY *pkey;pkey226,8057
+struct CMS_KeyAgreeRecipientInfo_st229,8079
+	long version;231,8118
+	CMS_OriginatorIdentifierOrKey *originator;originator232,8133
+	ASN1_OCTET_STRING *ukm;ukm233,8177
+ 	X509_ALGOR *keyEncryptionAlgorithm;keyEncryptionAlgorithm234,8202
+	STACK_OF(235,8240
+struct CMS_OriginatorIdentifierOrKey_st238,8307
+	int type;240,8350
+		CMS_IssuerAndSerialNumber *issuerAndSerialNumber;issuerAndSerialNumber242,8370
+		ASN1_OCTET_STRING *subjectKeyIdentifier;subjectKeyIdentifier243,8422
+		CMS_OriginatorPublicKey *originatorKey;originatorKey244,8465
+		} d;245,8507
+struct CMS_OriginatorPublicKey_st248,8519
+	X509_ALGOR *algorithm;algorithm250,8556
+	ASN1_BIT_STRING *publicKey;publicKey251,8580
+struct CMS_RecipientEncryptedKey_st254,8614
+ 	CMS_KeyAgreeRecipientIdentifier *rid;rid256,8653
+ 	ASN1_OCTET_STRING *encryptedKey;encryptedKey257,8693
+struct CMS_KeyAgreeRecipientIdentifier_st260,8733
+	int type;262,8778
+		CMS_IssuerAndSerialNumber *issuerAndSerialNumber;issuerAndSerialNumber264,8798
+		CMS_RecipientKeyIdentifier *rKeyId;rKeyId265,8850
+		} d;266,8888
+struct CMS_RecipientKeyIdentifier_st269,8900
+ 	ASN1_OCTET_STRING *subjectKeyIdentifier;subjectKeyIdentifier271,8940
+ 	ASN1_GENERALIZEDTIME *date;date272,8983
+ 	CMS_OtherKeyAttribute *other;other273,9013
+struct CMS_KEKRecipientInfo_st276,9050
+ 	long version;278,9084
+ 	CMS_KEKIdentifier *kekid;kekid279,9100
+ 	X509_ALGOR *keyEncryptionAlgorithm;keyEncryptionAlgorithm280,9128
+ 	ASN1_OCTET_STRING *encryptedKey;encryptedKey281,9166
+	unsigned char *key;key283,9241
+	size_t keylen;284,9262
+struct CMS_KEKIdentifier_st287,9283
+ 	ASN1_OCTET_STRING *keyIdentifier;keyIdentifier289,9314
+ 	ASN1_GENERALIZEDTIME *date;date290,9350
+ 	CMS_OtherKeyAttribute *other;other291,9380
+struct CMS_PasswordRecipientInfo_st294,9417
+ 	long version;296,9456
+ 	X509_ALGOR *keyDerivationAlgorithm;keyDerivationAlgorithm297,9472
+ 	X509_ALGOR *keyEncryptionAlgorithm;keyEncryptionAlgorithm298,9510
+ 	ASN1_OCTET_STRING *encryptedKey;encryptedKey299,9548
+	unsigned char *pass;pass301,9618
+	size_t passlen;302,9640
+struct CMS_OtherRecipientInfo_st305,9662
+ 	ASN1_OBJECT *oriType;oriType307,9698
+ 	ASN1_TYPE *oriValue;oriValue308,9722
+struct CMS_DigestedData_st311,9750
+	long version;313,9780
+	X509_ALGOR *digestAlgorithm;digestAlgorithm314,9795
+	CMS_EncapsulatedContentInfo *encapContentInfo;encapContentInfo315,9825
+	ASN1_OCTET_STRING *digest;digest316,9873
+struct CMS_EncryptedData_st319,9906
+	long version;321,9937
+	CMS_EncryptedContentInfo *encryptedContentInfo;encryptedContentInfo322,9952
+	STACK_OF(323,10001
+struct CMS_AuthenticatedData_st326,10051
+	long version;328,10086
+	CMS_OriginatorInfo *originatorInfo;originatorInfo329,10101
+	STACK_OF(330,10138
+struct CMS_CompressedData_st339,10397
+	long version;341,10429
+	X509_ALGOR *compressionAlgorithm;compressionAlgorithm342,10444
+	STACK_OF(343,10479
+struct CMS_RevocationInfoChoice_st347,10578
+	int type;349,10616
+		X509_CRL *crl;crl351,10636
+		CMS_OtherRevocationInfoFormat *other;other352,10653
+		} d;353,10693
+#define CMS_REVCHOICE_CRL	356,10705
+#define CMS_REVCHOICE_OTHER	357,10734
+struct CMS_OtherRevocationInfoFormat_st359,10766
+	ASN1_OBJECT *otherRevInfoFormat;otherRevInfoFormat361,10809
+ 	ASN1_TYPE *otherRevInfo;otherRevInfo362,10843
+struct CMS_CertificateChoices365,10875
+	int type;367,10908
+		X509 *certificate;certificate370,10930
+		ASN1_STRING *extendedCertificate;extendedCertificate371,10951
+		ASN1_STRING *v1AttrCert;v1AttrCert372,11002
+		ASN1_STRING *v2AttrCert;v2AttrCert373,11056
+		CMS_OtherCertificateFormat *other;other374,11110
+		} d;375,11147
+#define CMS_CERTCHOICE_CERT	378,11159
+#define CMS_CERTCHOICE_EXCERT	379,11191
+#define CMS_CERTCHOICE_V1ACERT	380,11224
+#define CMS_CERTCHOICE_V2ACERT	381,11258
+#define CMS_CERTCHOICE_OTHER	382,11292
+struct CMS_OtherCertificateFormat_st384,11325
+	ASN1_OBJECT *otherCertFormat;otherCertFormat386,11365
+ 	ASN1_TYPE *otherCert;otherCert387,11396
+struct CMS_IssuerAndSerialNumber_st394,11538
+	X509_NAME *issuer;issuer396,11577
+	ASN1_INTEGER *serialNumber;serialNumber397,11597
+struct CMS_OtherKeyAttribute_st400,11631
+	ASN1_OBJECT *keyAttrId;keyAttrId402,11666
+ 	ASN1_TYPE *keyAttr;keyAttr403,11691
+struct CMS_ReceiptRequest_st410,11764
+	ASN1_OCTET_STRING *signedContentIdentifier;signedContentIdentifier412,11796
+	CMS_ReceiptsFrom *receiptsFrom;receiptsFrom413,11841
+	STACK_OF(414,11874
+struct CMS_ReceiptsFrom_st418,11918
+	int type;420,11948
+		long allOrFirstTier;423,11970
+		STACK_OF(424,11993
+struct CMS_Receipt_st429,12052
+	long version;431,12077
+	ASN1_OBJECT *contentType;contentType432,12092
+	ASN1_OCTET_STRING *signedContentIdentifier;signedContentIdentifier433,12119
+	ASN1_OCTET_STRING *originatorSignatureValue;originatorSignatureValue434,12164
+struct CMS_TimestampedData_st448,12561
+	ASN1_INTEGER *version;version450,12594
+	ASN1_IA5STRING *dataUri;dataUri451,12618
+	CMS_MetaData *metaData;metaData452,12644
+	ASN1_OCTET_STRING *content;content453,12669
+	CMS_Evidence *temporalEvidence;temporalEvidence454,12698
+struct CMS_MetaData_st466,13042
+	ASN1_BOOLEAN *hashProtected;hashProtected468,13068
+	ASN1_UTF8STRING *fileName;fileName469,13098
+	ASN1_IA5STRING *mediaType;mediaType470,13126
+	STACK_OF(471,13154
+struct CMS_Evidence_st483,13522
+	int type;485,13548
+		STACK_OF(488,13570
+#define CMS_EVIDENCE_TIMESTAMP 494,13744
+#define CMS_EVIDENCE_RECORD	495,13778
+#define CMS_EVIDENCE_OTHER 496,13809
+typedef CMS_ContentInfo	 CMS_TimeStampToken;503,14015
+struct CMS_TimeStampAndCRL_st505,14061
+	CMS_TimeStampToken *timeStamp;timeStamp507,14094
+	X509_CRL *crl;crl508,14156
+struct CMS_TimeStampResp_st521,14530
+	CMS_PKIStatusInfo *status;status523,14561
+	CMS_TimeStampToken *timeStampToken;timeStampToken524,14589
+struct CMS_PKIStatusInfo_st535,14905
+	ASN1_INTEGER *status;status537,14936
+	STACK_OF(538,14959
+struct CMS_TSTInfo_st564,16086
+	ASN1_INTEGER *version;version566,16111
+	ASN1_OBJECT *policy;policy567,16135
+	CMS_MessageImprint *messageImprint;messageImprint568,16157
+	ASN1_INTEGER *serialNumber;serialNumber569,16194
+	ASN1_GENERALIZEDTIME *genTime;genTime570,16223
+	CMS_Accuracy *accuracy;accuracy571,16255
+	ASN1_BOOLEAN ordering;572,16280
+	ASN1_INTEGER *nonce;nonce573,16304
+	GENERAL_NAME *tsa;tsa574,16326
+	STACK_OF(575,16346
+struct CMS_MessageImprint_st582,16535
+	X509_ALGOR *hashAlgorithm;hashAlgorithm584,16567
+	ASN1_OCTET_STRING *hashedMessage;hashedMessage585,16595
+struct CMS_Accuracy_st595,16822
+	ASN1_INTEGER *seconds;seconds597,16848
+	ASN1_INTEGER *millis;millis598,16872
+	ASN1_INTEGER *micros;micros599,16895
+struct CMS_OtherEvidence_st606,17034
+	ASN1_OBJECT *oeType;oeType608,17065
+    ASN1_TYPE *oeValue;oeValue609,17087
+struct CMS_EvidenceRecord_st628,17696
+	ASN1_INTEGER *version;version630,17728
+	STACK_OF(631,17752
+struct CMS_EncryptionInfo_st641,18091
+	ASN1_OBJECT *encryptionInfoType;encryptionInfoType643,18123
+	ASN1_TYPE *encryptionInfoValue;encryptionInfoValue644,18157
+struct CMS_ArchiveTimeStamp_st657,18539
+	X509_ALGOR *digestAlgorithm;digestAlgorithm659,18573
+	STACK_OF(660,18603
+struct CMS_ArchiveTimeStampChain_st669,18827
+	STACK_OF(671,18866
+#define CMS_SIGNERINFO_ISSUER_SERIAL	689,19448
+#define CMS_SIGNERINFO_KEYIDENTIFIER	690,19487
+#define CMS_RECIPINFO_ISSUER_SERIAL	692,19527
+#define CMS_RECIPINFO_KEYIDENTIFIER	693,19565
+
+cms_asn1.c,1529
+} ASN1_SEQUENCE_END(69,3009
+} ASN1_SEQUENCE_END(74,3234
+} ASN1_CHOICE_END(82,3666
+} ASN1_CHOICE_END(87,3913
+} ASN1_NDEF_SEQUENCE_END(92,4161
+} ASN1_SEQUENCE_END_cb(117,5039
+} ASN1_SEQUENCE_END(122,5287
+} ASN1_CHOICE_END(127,5517
+} ASN1_NDEF_SEQUENCE_END(136,5993
+} ASN1_SEQUENCE_END(141,6232
+} ASN1_NDEF_SEQUENCE_END(147,6553
+} ASN1_SEQUENCE_END(154,6924
+} ASN1_SEQUENCE_END(159,7126
+} ASN1_SEQUENCE_END(165,7434
+} ASN1_CHOICE_END(170,7717
+} ASN1_SEQUENCE_END(175,7966
+} ASN1_SEQUENCE_END(180,8187
+} ASN1_CHOICE_END(186,8554
+} ASN1_SEQUENCE_END(194,9031
+} ASN1_SEQUENCE_END(200,9300
+} ASN1_SEQUENCE_END(207,9633
+} ASN1_SEQUENCE_END(214,10008
+} ASN1_SEQUENCE_END(219,10214
+} ASN1_CHOICE_END_cb(264,11508
+} ASN1_NDEF_SEQUENCE_END(272,11963
+} ASN1_NDEF_SEQUENCE_END(279,12294
+} ASN1_NDEF_SEQUENCE_END(285,12586
+} ASN1_NDEF_SEQUENCE_END(297,13295
+} ASN1_NDEF_SEQUENCE_END(303,13585
+}ASN1_NDEF_SEQUENCE_END(ASN1_NDEF_SEQUENCE_END312,13918
+} ASN1_NDEF_SEQUENCE_END(335,14562
+} ASN1_NDEF_SEQUENCE_END(340,14779
+} ASN1_NDEF_SEQUENCE_END(347,15160
+} ASN1_NDEF_SEQUENCE_END(351,15334
+} ASN1_NDEF_SEQUENCE_END(359,15774
+} ASN1_NDEF_SEQUENCE_END(364,15964
+} ASN1_CHOICE_END(370,16242
+} ASN1_NDEF_SEQUENCE_END(378,16614
+} ASN1_SEQUENCE_END(383,16827
+} ASN1_SEQUENCE_END(389,17056
+} ASN1_SEQUENCE_END(395,17312
+} ASN1_SEQUENCE_END(408,17919
+} ASN1_SEQUENCE_END(433,18623
+static int cms_cb(451,19811
+} ASN1_NDEF_SEQUENCE_END_cb(485,20554
+} ASN1_CHOICE_END(511,21421
+} ASN1_SEQUENCE_END(517,21708
+
+cms_att.c,1005
+int CMS_signed_get_attr_count(63,2748
+int CMS_signed_get_attr_by_NID(68,2857
+int CMS_signed_get_attr_by_OBJ(74,3009
+X509_ATTRIBUTE *CMS_signed_get_attr(CMS_signed_get_attr80,3170
+X509_ATTRIBUTE *CMS_signed_delete_attr(CMS_signed_delete_attr85,3293
+int CMS_signed_add1_attr(90,3416
+int CMS_signed_add1_attr_by_OBJ(96,3555
+int CMS_signed_add1_attr_by_NID(105,3775
+int CMS_signed_add1_attr_by_txt(114,3980
+void *CMS_signed_get0_data_by_OBJ(CMS_signed_get0_data_by_OBJ123,4203
+int CMS_unsigned_get_attr_count(129,4378
+int CMS_unsigned_get_attr_by_NID(134,4491
+int CMS_unsigned_get_attr_by_OBJ(140,4647
+X509_ATTRIBUTE *CMS_unsigned_get_attr(CMS_unsigned_get_attr146,4812
+X509_ATTRIBUTE *CMS_unsigned_delete_attr(CMS_unsigned_delete_attr151,4939
+int CMS_unsigned_add1_attr(156,5066
+int CMS_unsigned_add1_attr_by_OBJ(162,5209
+int CMS_unsigned_add1_attr_by_NID(171,5433
+int CMS_unsigned_add1_attr_by_txt(180,5642
+void *CMS_unsigned_get0_data_by_OBJ(CMS_unsigned_get0_data_by_OBJ189,5869
+
+cms_cd.c,98
+DECLARE_ASN1_ITEM(64,2786
+BIO *cms_CompressedData_init_bio(cms_CompressedData_init_bio113,3751
+
+cms_dd.c,133
+DECLARE_ASN1_ITEM(62,2735
+BIO *cms_DigestedData_init_bio(cms_DigestedData_init_bio97,3330
+int cms_DigestedData_do_final(104,3499
+
+cms_enc.c,177
+DECLARE_ASN1_ITEM(65,2797
+int cms_EncryptedContent_init(239,6190
+int CMS_EncryptedData_set1_key(257,6565
+BIO *cms_EncryptedData_init_bio(cms_EncryptedData_init_bio288,7386
+
+cms_env.c,1082
+DECLARE_ASN1_ITEM(67,2845
+static CMS_EnvelopedData *cms_enveloped_data_init(cms_enveloped_data_init85,3304
+STACK_OF(106,3892
+int CMS_RecipientInfo_type(115,4086
+CMS_ContentInfo *CMS_EnvelopedData_create(CMS_EnvelopedData_create120,4161
+CMS_RecipientInfo *CMS_add1_recipient_cert(CMS_add1_recipient_cert147,4809
+int CMS_RecipientInfo_ktri_get0_algs(235,6568
+int CMS_RecipientInfo_ktri_get0_signer_id(258,7012
+int CMS_RecipientInfo_ktri_cert_cmp(275,7440
+int CMS_RecipientInfo_set0_pkey(286,7716
+static int cms_RecipientInfo_ktri_encrypt(300,8021
+static int cms_RecipientInfo_ktri_decrypt(365,9287
+int CMS_RecipientInfo_kekri_id_cmp(441,10771
+static size_t aes_wrap_keylen(461,11312
+CMS_RecipientInfo *CMS_add0_recipient_key(CMS_add0_recipient_key479,11528
+int CMS_RecipientInfo_kekri_get0_id(591,13559
+int CMS_RecipientInfo_set0_key(628,14313
+static int cms_RecipientInfo_kekri_encrypt(647,14687
+static int cms_RecipientInfo_kekri_decrypt(707,15799
+int CMS_RecipientInfo_decrypt(786,17352
+BIO *cms_EnvelopedData_init_bio(cms_EnvelopedData_init_bio806,17802
+
+cms_err.c,218
+#define ERR_FUNC(68,2975
+#define ERR_REASON(69,3027
+static ERR_STRING_DATA CMS_str_functs[CMS_str_functs71,3086
+static ERR_STRING_DATA CMS_str_reasons[CMS_str_reasons161,8870
+void ERR_load_CMS_strings(258,15233
+
+cms_ess.c,368
+DECLARE_ASN1_ITEM(63,2762
+CMS_ReceiptRequest *CMS_ReceiptRequest_create0(CMS_ReceiptRequest_create092,3390
+int CMS_add1_ReceiptRequest(140,4359
+void CMS_ReceiptRequest_get0_values(166,4834
+static int cms_msgSigDigest(194,5450
+int cms_msgSigDigest_add1(209,5836
+int cms_Receipt_verify(229,6376
+ASN1_OCTET_STRING *cms_encode_Receipt(cms_encode_Receipt377,9556
+
+cms_io.c,290
+int CMS_stream(61,2703
+CMS_ContentInfo *d2i_CMS_bio(d2i_CMS_bio80,3104
+int i2d_CMS_bio(85,3241
+IMPLEMENT_PEM_rw_const(90,3364
+int i2d_CMS_bio_stream(100,3646
+int PEM_write_bio_CMS_stream(106,3830
+int SMIME_write_CMS(113,4039
+CMS_ContentInfo *SMIME_read_CMS(SMIME_read_CMS128,4502
+
+cms_lib.c,1070
+IMPLEMENT_ASN1_FUNCTIONS(63,2755
+CMS_ContentInfo *cms_Data_create(cms_Data_create76,3104
+BIO *cms_content_bio(cms_content_bio89,3335
+BIO *CMS_dataInit(CMS_dataInit105,3833
+int CMS_dataFinal(161,4809
+ASN1_OCTET_STRING **CMS_get0_content(CMS_get0_content213,6091
+static ASN1_OBJECT **cms_get0_econtent_type(cms_get0_econtent_type255,7195
+const ASN1_OBJECT *CMS_get0_eContentType(CMS_get0_eContentType286,7996
+int CMS_set1_eContentType(295,8173
+int CMS_is_detached(311,8476
+int CMS_set_detached(322,8639
+void cms_DigestAlgorithm_set(353,9219
+BIO *cms_DigestAlgorithm_init_bio(cms_DigestAlgorithm_init_bio368,9546
+int cms_DigestAlgorithm_find_ctx(397,10212
+static STACK_OF(428,10967
+CMS_CertificateChoices *CMS_add0_CertificateChoices(CMS_add0_CertificateChoices447,11386
+int CMS_add0_cert(469,11917
+int CMS_add1_cert(500,12609
+static STACK_OF(509,12784
+CMS_RevocationInfoChoice *CMS_add0_RevocationInfoChoice(CMS_add0_RevocationInfoChoice528,13187
+int CMS_add0_crl(550,13726
+int CMS_add1_crl(561,13947
+STACK_OF(570,14125
+STACK_OF(603,14829
+
+cms_pwri.c,242
+int CMS_RecipientInfo_set0_password(65,2811
+CMS_RecipientInfo *CMS_add0_recipient_password(CMS_add0_recipient_password83,3219
+static int kek_unwrap_key(224,6630
+static int kek_wrap_key(278,8071
+int cms_RecipientInfo_pwri_crypt(322,9075
+
+cms_sd.c,1171
+DECLARE_ASN1_ITEM(65,2790
+static CMS_SignedData *cms_signed_data_init(cms_signed_data_init77,3068
+int CMS_SignedData_init(100,3729
+static void cms_sd_set_version(110,3909
+static int cms_copy_messageDigest(172,5236
+int cms_set1_SignerIdentifier(210,6244
+int cms_SignerIdentifier_get0_signer_id(255,7237
+int cms_SignerIdentifier_cert_cmp(276,7718
+CMS_SignerInfo *CMS_add1_signer(CMS_add1_signer300,8318
+static int cms_add1_signingTime(462,11706
+STACK_OF(492,12124
+STACK_OF(501,12299
+void CMS_SignerInfo_set1_signer_cert(529,12842
+int CMS_SignerInfo_get0_signer_id(543,13143
+int CMS_SignerInfo_cert_cmp(550,13355
+int CMS_set1_signers_certs(555,13476
+void CMS_SignerInfo_get0_algs(606,14551
+static int cms_SignerInfo_content_sign(619,14832
+int cms_SignedData_final(686,16305
+int CMS_SignerInfo_sign(702,16703
+int CMS_SignerInfo_verify(769,18096
+BIO *cms_SignedData_init_bio(cms_SignedData_init_bio812,19059
+int CMS_SignerInfo_verify_content(842,19699
+int CMS_add_smimecap(911,21162
+int CMS_add_simple_smimecap(924,21494
+static int cms_add_cipher_smcap(957,22158
+static int cms_add_digest_smcap(964,22332
+int CMS_add_standard_smimecap(971,22506
+
+cms_smime.c,1131
+static int cms_copy_content(66,2867
+static int check_content(126,3856
+static void do_free_upto(137,4060
+int CMS_data(154,4256
+CMS_ContentInfo *CMS_data_create(CMS_data_create171,4601
+int CMS_digest_verify(186,4866
+CMS_ContentInfo *CMS_digest_create(CMS_digest_create210,5372
+int CMS_EncryptedData_decrypt(230,5758
+CMS_ContentInfo *CMS_EncryptedData_encrypt(CMS_EncryptedData_encrypt256,6350
+static int cms_signerinfo_verify_cert(283,6951
+int CMS_verify(326,7926
+int CMS_verify_receipt(466,11102
+CMS_ContentInfo *CMS_sign(CMS_sign478,11411
+CMS_ContentInfo *CMS_sign_receipt(CMS_sign_receipt519,12205
+CMS_ContentInfo *CMS_encrypt(CMS_encrypt591,13641
+int CMS_decrypt_set1_pkey(627,14371
+int CMS_decrypt_set1_key(687,15881
+int CMS_decrypt_set1_password(726,16822
+int CMS_decrypt(750,17465
+int CMS_final(779,18196
+int CMS_uncompress(811,18680
+CMS_ContentInfo *CMS_compress(CMS_compress834,19146
+int CMS_uncompress(855,19559
+CMS_ContentInfo *CMS_compress(CMS_compress862,19739
+int CMS_timeStampedData_verify(870,19911
+int CMS_timeStampedData_request(964,22295
+int CMS_timeStampedData_create(970,22461
+
+cms_tsd.c,889
+static CMS_TimestampedData *cms_get0_timestampedData(cms_get0_timestampedData71,2884
+STACK_OF(87,3282
+CMS_ContentInfo *cms_get_token(cms_get_token97,3525
+static CMS_TSTInfo *cms_get0_tstInfo(cms_get0_tstInfo116,3980
+static CMS_MessageImprint *cms_TSTInfo_get0_msgImprint(cms_TSTInfo_get0_msgImprint121,4083
+static X509_ALGOR *cms_TSTInfo_get0_hashAlgorithm(cms_TSTInfo_get0_hashAlgorithm126,4200
+static ASN1_OCTET_STRING *cms_TSTInfo_get0_hashedMessage(cms_TSTInfo_get0_hashedMessage133,4411
+CMS_MetaData *cms_get0_metaData(cms_get0_metaData140,4629
+int cms_metaData_init(145,4739
+int cms_check_dataUri(173,5506
+static int cms_compute_content_digest(181,5655
+static int cms_compute_token_digest(200,6173
+static int cms_digest_matching_verify(215,6544
+int cms_Token_digest_verify(240,7326
+int cms_Token_signature_verify(306,8943
+int cms_TimeStampedData_init(323,9340

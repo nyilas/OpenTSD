@@ -320,16 +320,11 @@ int cms_Token_signature_verify(CMS_ContentInfo *token,
 	return 1;
 	}
 
-int cms_TimeStampedData_init(BIO *content, char *dataUri,
+int cms_TimeStampedData_init(CMS_ContentInfo *cms, BIO *content, char *dataUri,
 		char *fileName, char *mediaType, BIO *token, unsigned int flags)
 	{
-	CMS_ContentInfo *cms;
 	CMS_TimestampedData *tsd;
 	CMS_MetaData *metaData;
-
-	cms = CMS_ContentInfo_new();
-	if (!cms)
-		return NULL;
 
 	tsd = M_ASN1_new_of(CMS_TimestampedData);
 	if (!tsd)
@@ -348,9 +343,6 @@ int cms_TimeStampedData_init(BIO *content, char *dataUri,
 		if (!ASN1_STRING_set(tsd->dataUri, dataUri, strlen(dataUri)))
 			goto err;
 		}
-	if(!cms_metaData_init(metaData, fileName, mediaType, flags))
-		goto err;
-
 	err:
 	if (tsd)
 		M_ASN1_free_of(tsd, CMS_TimestampedData);
