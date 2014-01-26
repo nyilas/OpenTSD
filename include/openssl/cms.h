@@ -112,9 +112,9 @@ DECLARE_ASN1_PRINT_FUNCTION(CMS_ContentInfo)
 #define CMS_REUSE_DIGEST		0x8000
 #define CMS_USE_KEYID			0x10000
 #define CMS_DEBUG_DECRYPT		0x20000
-#define CMS_TIMESTAMP_VERIFY	0x40000
+#define CMS_TIMESTAMP_VERIFY	        0x40000
 #define CMS_EXT_TOKEN			0X80000
-#define CMS_HASH_PROTECTED_METADATA		0x100000
+#define CMS_HASH_PROTECTED_METADATA	0x100000
 
 
 const ASN1_OBJECT *CMS_get0_type(CMS_ContentInfo *cms);
@@ -244,8 +244,6 @@ CMS_ContentInfo *CMS_compress(BIO *in, int comp_nid, unsigned int flags);
 
 int CMS_timeStampedData_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 		 X509_STORE *store, BIO *dcont, BIO *out, unsigned int flags);
-int CMS_timeStampedData_create(BIO *content, char *dataUri,
-		char *fileName, char *mediaType, BIO *token, unsigned int flags);
 
 int CMS_set1_eContentType(CMS_ContentInfo *cms, const ASN1_OBJECT *oid);
 const ASN1_OBJECT *CMS_get0_eContentType(CMS_ContentInfo *cms);

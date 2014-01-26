@@ -1240,7 +1240,7 @@ int MAIN(int argc, char **argv)
 		}
 	else if (operation == SMIME_TIMESTAMP_CREATE)
 			{
-			if (CMS_timestamp_create(in, token, dataUri, out, sign_md, flags) > 0)
+			if (CMS_timeStampedData_create(in, token, dataUri, fileName, mediaType, sign_md, out, flags) > 0)
 				BIO_printf(bio_err, "Timestamp creation successful\n");
 			else
 				{

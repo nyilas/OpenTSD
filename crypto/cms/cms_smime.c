@@ -961,17 +961,18 @@ int CMS_timeStampedData_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs,
 	return 0;
 	}
 
+/*
 int CMS_timeStampedData_request(BIO *in, BIO *token, char *dataUri,
 		char *mediaType, char fileName, BIO *out, EVP_MD digest_md, unsigned int flags)
 {
 	return 0;
 }
+*/
 
 int CMS_timeStampedData_create(BIO *content, BIO *token, char *dataUri,
-		char *fileName, char *mediaType, BIO *out, unsigned int flags)
+		char *fileName, char *mediaType, EVP_MD *sign_md, BIO *out, unsigned int flags)
 	{
 	CMS_ContentInfo *cms;
-	CMS_MetaData *metaData;
 
 	if (!content)
 	{
@@ -986,15 +987,13 @@ int CMS_timeStampedData_create(BIO *content, BIO *token, char *dataUri,
 
 
 	cms = CMS_ContentInfo_new();
-	if (!cms || !cms_TimeStampedData_init(cms, content, dataUri, token, flags))
+	if (!cms || !cms_timeStampedData_init(cms, content, dataUri, token, flags))
 		goto merr;
-
-	metaData = M_ASN1_new_of(CMS_MetaData);	
-	if (!metaData || !cms_metaData_init(metaData, fileName, mediaType, flags))
+	
+	if (!cms_metaData_init(cms, fileName, mediaType, flags))
 		goto err;
-	cms->metaData = metaData;
 
-	if ((flags & CMS_STREAM) || CMS_final(cms, in, NULL, flags))
+	if ((flags & CMS_STREAM) || CMS_final(cms, content, NULL, flags))
 		return 1;
 
 	merr:
