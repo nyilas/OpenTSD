@@ -155,10 +155,10 @@ int cms_metaData_init(CMS_ContentInfo *cms, char *fileName,
 		*(metaData->hashProtected) = 1;
 	if(!(metaData->fileName = ASN1_UTF8STRING_new())
 	   || !ASN1_STRING_set(metaData->fileName, fileName, strlen(fileName)))
-		goto err;
+		goto merr;
 	if(!(metaData->mediaType = ASN1_IA5STRING_new())
 	   || !ASN1_STRING_set(metaData->mediaType, mediaType, strlen(mediaType)))
-		goto err;
+		goto merr;
 	if (!(flags & CMS_NOATTR)) 
 		{
 		metaData->otherMetaData = sk_X509_ATTRIBUTE_new_null();
@@ -169,13 +169,13 @@ int cms_metaData_init(CMS_ContentInfo *cms, char *fileName,
 	
 	return 1;
 	
-	mderr:
+	merr:
 	CMSerr(CMS_F_CMS_METADATA_INIT, ERR_R_MALLOC_FAILURE);
 	err:
 	if(metaData)
 		M_ASN1_free_of(metaData, CMS_MetaData);
 	return 0;
-}
+	}
 
 
 int cms_check_dataUri(CMS_ContentInfo *cms)
@@ -299,7 +299,6 @@ int cms_Token_digest_verify(CMS_ContentInfo *cms, CMS_ContentInfo *token, int ex
 
 	return cms_digest_matching_verify(tstInfo, digest, digestLength);
 
-
 	err:
 	if (tstInfo)
 		CMS_TSTInfo_free(tstInfo);
@@ -332,32 +331,29 @@ int cms_timeStampedData_init(CMS_ContentInfo *cms, BIO *content, char *dataUri,
 		BIO *token, unsigned int flags)
 	{
 	CMS_TimestampedData *tsd;
-	CMS_MetaData *metaData;
 
 	tsd = M_ASN1_new_of(CMS_TimestampedData);
 	if (!tsd)
-		goto err;
+		goto merr;
 
 	cms->contentType = OBJ_nid2obj(NID_id_smime_ct_timestampedData);
 	cms->d.timestampedData = tsd;
 
-	tsd->version = M_ASN1_INTEGER_new();
-	if (!ASN1_INTEGER_set(tsd->version, 1))
-		goto err;
+	if (!(tsd->version = M_ASN1_INTEGER_new()) 
+	    || !ASN1_INTEGER_set(tsd->version, 1))
+		goto merr;
 
 	if (dataUri)
 		{
-		tsd->dataUri = M_ASN1_IA5STRING_new();
-		if (!ASN1_STRING_set(tsd->dataUri, dataUri, strlen(dataUri)))
-			goto err;
+		if (!(tsd->dataUri = M_ASN1_IA5STRING_new()) 
+		    !! !ASN1_STRING_set(tsd->dataUri, dataUri, strlen(dataUri)))
+			goto merr;
 		}
+	return 1;
 
-	err:
+	merr:
+	CMSerr(CMS_F_CMS_TIMESTAMPEDDATA_INIT, ERR_R_MALLOC_FAILURE);
 	if (tsd)
 		M_ASN1_free_of(tsd, CMS_TimestampedData);
-
-	if (cms)
-		CMS_ContentInfo_free(cms);
-
+	return 0;
 	}
-
